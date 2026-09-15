@@ -1,0 +1,49 @@
+Run everything on one lab PC (the server). Every other PC only opens a browser.
+
+1. Server PC (once)
+In two terminals, from the project folder:
+
+Backend
+
+cd backend
+composer install
+copy .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan storage:link
+php artisan serve --host=0.0.0.0 --port=8000
+Frontend
+
+cd frontend
+npm install
+npm run dev
+Vite is already set to 0.0.0.0:5173 and proxies /api and /storage to Laravel, so other PCs only need the UI port.
+
+Firewall (admin Command Prompt on the server):
+
+netsh advfirewall firewall add rule name="NJV Voting UI" dir=in action=allow protocol=TCP localport=5173
+Find the server IP
+
+ipconfig
+Use the IPv4 address on the lab LAN, e.g. 192.168.1.20.
+
+2. Every other PC
+Same Wi‑Fi/LAN. Browser:
+
+http://192.168.1.20:5173
+
+Replace with your real IP. Do not use localhost on student/admin PCs.
+
+Role	What to do
+Admin (results)	Open that URL → Admin login → live board
+Voting PCs	Teacher login → enter student @njv.edu.pk email → student votes → station resets
+Admin can stay on a second tab/PC; it polls results. Students still need a teacher session on that PC (email + 5‑minute token). This is not a free-for-all “open ballot” page.
+
+3. Lab checklist
+Server and clients on the same network (not guest Wi‑Fi isolation).
+Keep both terminals running on the server.
+If the page loads but votes fail, the frontend isn’t reaching the server — check IP, firewall, and that php artisan serve is up.
+Photos work via /storage on port 5173 (proxied). Don’t send people to port 8000.
+Default seed logins (change after first run): admin / teacher accounts in the project README.
+
+If you want, I can add a start-lab.bat so the server PC starts both services with one double-click.

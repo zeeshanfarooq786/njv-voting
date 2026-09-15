@@ -1,0 +1,54 @@
+# ---------------------------------------------------------------
+# Secrets. NEVER commit these.
+# ---------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!frontend/.env.production
+backend/.env_copied.env
+backend/.env.backup
+*.pem
+*.key
+!backend/storage/*.key
+
+# ---------------------------------------------------------------
+# Dependencies (restored with composer install / npm install)
+# ---------------------------------------------------------------
+node_modules/
+backend/vendor/
+
+# ---------------------------------------------------------------
+# Laravel runtime files
+# ---------------------------------------------------------------
+backend/storage/logs/*.log
+backend/storage/framework/cache/data/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/bootstrap/cache/*.php
+backend/public/storage
+backend/public/hot
+
+# Candidate photos are uploaded at runtime, not source code.
+backend/public/uploads/candidates/*.jpg
+backend/public/uploads/candidates/*.jpeg
+backend/public/uploads/candidates/*.png
+backend/public/uploads/candidates/*.webp
+
+# ---------------------------------------------------------------
+# Build output
+# ---------------------------------------------------------------
+frontend/dist/
+release/
+electron/dist/
+electron/node_modules/
+
+# ---------------------------------------------------------------
+# Tooling, editor and OS noise
+# ---------------------------------------------------------------
+.monkeycode/
+.ohmyagent/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
