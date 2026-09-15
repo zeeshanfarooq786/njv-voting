@@ -57,7 +57,7 @@ function photoSrc(url) {
   return value
 }
 
-function validStudentEmail(value) {
+function validSchoolEmail(value) {
   return /^[a-z0-9._%+-]+@njv\.edu\.pk$/i.test(String(value || '').trim())
 }
 
@@ -542,7 +542,7 @@ function TeacherStation({ user, onLogout, onSession, onRipple }) {
     sounds.tap()
     setError('')
     const trimmed = email.trim().toLowerCase()
-    if (!validStudentEmail(trimmed)) {
+    if (!validSchoolEmail(trimmed)) {
       setError(`Use a valid school email, like ahmed.001@${DOMAIN}`)
       return
     }
@@ -1506,6 +1506,357 @@ function Toggle({ open, onChange }) {
   )
 }
 
+function StaffPanel({ onNote }) {
+  const [list, setList] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  const [editId, setEditId] = useState(null)
+  const [editName, setEditName] = useState('')
+  const [editEmail, setEditEmail] = useState('')
+
+  const [passId, setPassId] = useState(null)
+  const [pass1, setPass1] = useState('')
+  const [pass2, setPass2] = useState('')
+
+  const input =
+    'w-full rounded-xl border border-white/15 bg-[#0A3B65]/80 px-3 py-2 text-sm text-white placeholder-white/35 outline-none focus:border-[#FFC72C]'
+
+  async function reload() {
+    try {
+      const data = await api.teachers()
+      setList(data.teachers || [])
+      setError('')
+    } catch (err) {
+      setError(friendlyError(err))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    reload()
+  }, [])
+
+  async function add(e) {
+    e.preventDefault()
+    const address = email.trim().toLowerCase()
+
+    if (!validSchoolEmail(address)) {
+      setError(`Staff email must be a valid @${DOMAIN} address, like sadia.khan@${DOMAIN}`)
+      return
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.')
+      return
+    }
+
+    setBusy(true)
+    setError('')
+    try {
+      await api.storeTeacher({ name: name.trim(), email: address, password })
+      setName('')
+      setEmail('')
+      setPassword('')
+      await reload()
+      onNote?.('Staff added')
+    } catch (err) {
+      setError(friendlyError(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function startEdit(person) {
+    setPassId(null)
+    setEditId(person.id)
+    setEditName(person.name)
+    setEditEmail(person.email)
+    setError('')
+  }
+
+  async function saveEdit(id) {
+    const address = editEmail.trim().toLowerCase()
+
+    if (!editName.trim()) {
+      setError('Name cannot be empty.')
+      return
+    }
+    if (!validSchoolEmail(address)) {
+      setError(`Staff email must be a valid @${DOMAIN} address.`)
+      return
+    }
+
+    setBusy(true)
+    setError('')
+    try {
+      await api.updateTeacher(id, { name: editName.trim(), email: address })
+      setEditId(null)
+      await reload()
+      onNote?.('Staff updated')
+    } catch (err) {
+      setError(friendlyError(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function startPass(person) {
+    setEditId(null)
+    setPassId(person.id)
+    setPass1('')
+    setPass2('')
+    setError('')
+  }
+
+  async function savePass(id) {
+    if (pass1.length < 8) {
+      setError('Password must be at least 8 characters.')
+      return
+    }
+    if (pass1 !== pass2) {
+      setError('The two passwords do not match.')
+      return
+    }
+
+    setBusy(true)
+    setError('')
+    try {
+      await api.updateTeacherPassword(id, { password: pass1, password_confirmation: pass2 })
+      setPassId(null)
+      setPass1('')
+      setPass2('')
+      await reload()
+      onNote?.('Password changed')
+    } catch (err) {
+      setError(friendlyError(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function remove(person) {
+    if (!window.confirm(`Delete ${person.name}'s account? This cannot be undone.`)) return
+
+    setBusy(true)
+    setError('')
+    try {
+      await api.destroyTeacher(person.id)
+      await reload()
+      onNote?.('Staff removed')
+    } catch (err) {
+      setError(friendlyError(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      <form onSubmit={add} className="admin-card space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm font-semibold text-white">Add staff</p>
+          <span className="rounded-full bg-[#FFC72C]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#FFC72C]">
+            @{DOMAIN} only
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <label className="block">
+            <span className="label-caps text-[10px]">Full name</span>
+            <input
+              className={input}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Sadia Khan"
+              required
+            />
+          </label>
+          <label className="block">
+            <span className="label-caps text-[10px]">School email</span>
+            <input
+              className={input}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={`sadia.khan@${DOMAIN}`}
+              inputMode="email"
+              autoComplete="off"
+              required
+            />
+          </label>
+          <label className="block">
+            <span className="label-caps text-[10px]">Password</span>
+            <input
+              className={input}
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 8 characters"
+              autoComplete="new-password"
+              required
+            />
+          </label>
+        </div>
+
+        <button disabled={busy} className="btn-gold w-full rounded-lg py-2 text-sm font-semibold">
+          Add staff
+        </button>
+      </form>
+
+      <div className="admin-card space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-white">
+            <IconUsers size={14} className="text-[#FFC72C]" />
+            Staff ({list.length})
+          </p>
+          <button type="button" className="ghost-btn" onClick={reload} disabled={loading}>
+            Refresh
+          </button>
+        </div>
+
+        {error && (
+          <p className="rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">{error}</p>
+        )}
+
+        {loading && <p className="text-xs text-white/60">Loading staff…</p>}
+
+        {!loading && list.length === 0 && (
+          <p className="text-xs text-white/60">No staff yet. Add the first account above.</p>
+        )}
+
+        <div className="space-y-2">
+          {list.map((person) => {
+            const editing = editId === person.id
+            const changing = passId === person.id
+
+            return (
+              <div key={person.id} className="rounded-xl border border-white/10 bg-[#0A3B65]/45 p-3">
+                {editing ? (
+                  <div className="space-y-2">
+                    <input
+                      className={input}
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      placeholder="Full name"
+                    />
+                    <input
+                      className={input}
+                      value={editEmail}
+                      onChange={(e) => setEditEmail(e.target.value)}
+                      placeholder={`name@${DOMAIN}`}
+                      inputMode="email"
+                    />
+                    <p className="text-[11px] text-white/50">Must be an @{DOMAIN} address.</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => saveEdit(person.id)}
+                        className="btn-gold rounded-full px-3 py-1 text-xs font-semibold"
+                      >
+                        Save changes
+                      </button>
+                      <button type="button" disabled={busy} onClick={() => setEditId(null)} className="ghost-btn">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#FFC72C]/40 bg-[#FFC72C]/15 text-[11px] font-bold text-[#FFC72C]">
+                        {initials(person.name)}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-white">{person.name}</p>
+                        <p className="truncate text-xs text-white/60">{person.email}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                          person.votes_count > 0 ? 'bg-emerald-400/15 text-emerald-200' : 'bg-white/10 text-white/60'
+                        }`}
+                      >
+                        {person.votes_count > 0
+                          ? `${person.votes_count} vote${person.votes_count === 1 ? '' : 's'}`
+                          : 'No votes'}
+                      </span>
+                      <button type="button" className="ghost-btn" onClick={() => startEdit(person)}>
+                        Edit
+                      </button>
+                      <button type="button" className="ghost-btn" onClick={() => startPass(person)}>
+                        Password
+                      </button>
+                      <button
+                        type="button"
+                        className="danger-btn"
+                        disabled={busy || !person.can_delete}
+                        title={
+                          person.can_delete
+                            ? `Delete ${person.name}`
+                            : 'This account is recorded on votes; deleting it would erase them from the results'
+                        }
+                        onClick={() => remove(person)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {changing && (
+                  <div className="mt-3 space-y-2 rounded-xl border border-[#FFC72C]/25 bg-[#0A3B65]/60 p-3">
+                    <p className="text-xs font-semibold text-white">New password for {person.name}</p>
+                    <input
+                      className={input}
+                      type="password"
+                      value={pass1}
+                      onChange={(e) => setPass1(e.target.value)}
+                      placeholder="New password"
+                      autoComplete="new-password"
+                    />
+                    <input
+                      className={input}
+                      type="password"
+                      value={pass2}
+                      onChange={(e) => setPass2(e.target.value)}
+                      placeholder="Repeat new password"
+                      autoComplete="new-password"
+                    />
+                    <p className="text-[11px] text-white/50">
+                      At least 8 characters. Changing it signs them out everywhere.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => savePass(person.id)}
+                        className="btn-gold rounded-full px-3 py-1 text-xs font-semibold"
+                      >
+                        Change password
+                      </button>
+                      <button type="button" disabled={busy} onClick={() => setPassId(null)} className="ghost-btn">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function AdminSide({ results, onRefresh, onLocalCandidate }) {
   const [tab, setTab] = useState('ballot')
   const [name, setName] = useState('')
@@ -1513,9 +1864,6 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
   const [photo, setPhoto] = useState(null)
   const [preview, setPreview] = useState('')
   const [eligible, setEligible] = useState(results.eligible_students ?? 0)
-  const [tName, setTName] = useState('')
-  const [tEmail, setTEmail] = useState('')
-  const [tPass, setTPass] = useState('')
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -1671,22 +2019,6 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
       await api.updateSettings({ eligible_students: Number(eligible) })
       note('Eligible students updated')
       onRefresh()
-    } catch (err) {
-      note(friendlyError(err))
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  async function addTeacher(e) {
-    e.preventDefault()
-    setBusy(true)
-    try {
-      await api.storeTeacher({ name: tName, email: tEmail, password: tPass })
-      setTName('')
-      setTEmail('')
-      setTPass('')
-      note('Teacher added')
     } catch (err) {
       note(friendlyError(err))
     } finally {
@@ -1962,17 +2294,7 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
         </form>
       )}
 
-      {tab === 'staff' && (
-        <form onSubmit={addTeacher} className="admin-card space-y-3">
-          <p className="text-sm font-semibold text-white">Add teacher</p>
-          <input className="w-full rounded-lg bg-[#0A3B65]/80 px-3 py-2 text-white" placeholder="Name" value={tName} onChange={(e) => setTName(e.target.value)} />
-          <input className="w-full rounded-lg bg-[#0A3B65]/80 px-3 py-2 text-white" placeholder="Email" value={tEmail} onChange={(e) => setTEmail(e.target.value)} />
-          <input className="w-full rounded-lg bg-[#0A3B65]/80 px-3 py-2 text-white" type="password" placeholder="Password" value={tPass} onChange={(e) => setTPass(e.target.value)} />
-          <button disabled={busy} className="w-full rounded-lg bg-white/15 py-2 text-sm font-semibold text-white">
-            Save teacher
-          </button>
-        </form>
-      )}
+      {tab === 'staff' && <StaffPanel onNote={note} />}
     </div>
   )
 }

@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Candidate;
 use App\Models\Setting;
+use App\Models\User;
 use App\Models\Vote;
 use App\Models\VoteEvent;
+use App\Support\StudentEmail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
@@ -201,10 +204,21 @@ class AdminController extends Controller
 
     public function teachers(): JsonResponse
     {
-        $teachers = \App\Models\User::query()
+        $teachers = User::query()
             ->where('role', 'teacher')
+            ->withCount('votes')
             ->orderBy('name')
-            ->get(['id', 'name', 'email', 'created_at']);
+            ->get()
+            ->map(fn (User $teacher) => [
+                'id' => $teacher->id,
+                'name' => $teacher->name,
+                'email' => $teacher->email,
+                'created_at' => optional($teacher->created_at)->toIso8601String(),
+                'votes_count' => $teacher->votes_count,
+                // Deleting a teacher cascades to their votes, so the UI hides
+                // the option when doing so would erase recorded results.
+                'can_delete' => $teacher->votes_count === 0,
+            ]);
 
         return response()->json(['teachers' => $teachers]);
     }
@@ -213,11 +227,11 @@ class AdminController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
+            'email' => ['required', 'email', 'max:191', $this->schoolEmailRule(), 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'max:72'],
         ]);
 
-        $teacher = \App\Models\User::query()->create([
+        $teacher = User::query()->create([
             'name' => $data['name'],
             'email' => strtolower($data['email']),
             'password' => $data['password'],
@@ -227,6 +241,89 @@ class AdminController extends Controller
         return response()->json([
             'teacher' => $teacher->only(['id', 'name', 'email']),
         ], 201);
+    }
+
+    public function updateTeacher(Request $request, User $user): JsonResponse
+    {
+        $this->assertTeacher($user);
+
+        $data = $request->validate([
+            'name' => ['sometimes', 'required', 'string', 'max:120'],
+            'email' => [
+                'sometimes', 'required', 'email', 'max:191',
+                $this->schoolEmailRule(),
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+        ]);
+
+        if (isset($data['email'])) {
+            $data['email'] = strtolower($data['email']);
+        }
+
+        $user->update($data);
+
+        return response()->json([
+            'teacher' => $user->only(['id', 'name', 'email']),
+        ]);
+    }
+
+    public function updateTeacherPassword(Request $request, User $user): JsonResponse
+    {
+        $this->assertTeacher($user);
+
+        $data = $request->validate([
+            'password' => ['required', 'string', 'min:8', 'max:72', 'confirmed'],
+        ]);
+
+        $user->update(['password' => $data['password']]);
+
+        // Force the staff member to sign in again with the new password.
+        $user->tokens()->delete();
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function destroyTeacher(Request $request, User $user): JsonResponse
+    {
+        $this->assertTeacher($user);
+
+        if ($user->id === $request->user()->id) {
+            return response()->json([
+                'message' => 'You cannot delete your own account.',
+            ], 422);
+        }
+
+        $votes = $user->votes()->count();
+
+        if ($votes > 0) {
+            return response()->json([
+                'message' => "This account is recorded on {$votes} vote(s). Deleting it would erase them from the results, so it has been blocked.",
+            ], 409);
+        }
+
+        $user->votingSessions()->delete();
+        $user->tokens()->delete();
+        $user->delete();
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Staff and students share the school domain, so both go through the same
+     * check to keep one source of truth for the allowed email domain.
+     */
+    private function schoolEmailRule(): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail): void {
+            if (!StudentEmail::isValid((string) $value)) {
+                $fail('The email must be a valid @'.StudentEmail::domain().' address.');
+            }
+        };
+    }
+
+    private function assertTeacher(User $user): void
+    {
+        abort_unless($user->isTeacher(), 404);
     }
 
     /**
