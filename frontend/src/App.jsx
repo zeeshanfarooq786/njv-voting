@@ -741,7 +741,6 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
     return map
   }, [data])
 
-  const leaders = useMemo(() => leadersByPosition(data?.candidates || []), [data])
   const positions = orderedPositions(Object.keys(grouped))
   const selectedCount = positions.filter((p) => picked[p]).length
   const complete = positions.length > 0 && selectedCount === positions.length
@@ -832,7 +831,6 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {currentList.map((c, i) => {
                     const active = picked[currentPost] === c.id
-                    const leading = leaders[c.position] === c.id
                     return (
                       <motion.button
                         key={c.id}
@@ -848,11 +846,10 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                           sounds.select()
                         }}
                         className={`vote-card relative overflow-hidden rounded-2xl border p-4 text-left transition ${
-                          active ? 'is-active border-[#FFC72C] bg-white/10' : leading ? 'border-[#FFC72C]/55 bg-[#0A3B65]/55' : 'border-white/10 bg-[#0A3B65]/45'
+                          active ? 'is-active border-[#FFC72C] bg-white/10' : 'border-white/10 bg-[#0A3B65]/45'
                         }`}
                       >
                         <span className="absolute inset-x-0 top-0 h-1" style={{ background: c.color_tag || '#FFC72C' }} />
-                        {leading && <span className="leading-badge absolute right-3 top-3">Leading</span>}
                         <div className="flex items-center gap-4">
                           <Avatar candidate={c} size={72} />
                           <div className="min-w-0 flex-1">
