@@ -1,0 +1,84 @@
+name: Deploy to production
+
+# Every push to main goes live on vote.zeeshanfarooq.site.
+# The runner builds the React app, then ships backend/ to the server over SSH.
+# The server never needs GitHub credentials, so the private repo stays private.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      # Ship only source. Everything below is deliberately excluded so the
+      # deploy can never destroy server-side state:
+      #   .env                  -> live database credentials
+      #   vendor/              -> installed by composer on the server
+      #   storage/             -> logs, sessions, compiled views
+      #   uploads/candidates/  -> student photos uploaded at runtime
+      - name: Upload files
+        run: |
+          set -euo pipefail
+          tar czf - \
+            --exclude='backend/.env' \
+            --exclude='backend/vendor' \
+            --exclude='backend/node_modules' \
+            --exclude='backend/storage' \
+            --exclude='backend/public/storage' \
+            --exclude='backend/public/uploads/candidates' \
+            --exclude='backend/public/*.zip' \
+            --exclude='backend/public/assets/*.zip' \
+            --exclude='backend/tests' \
+            --exclude='backend/database/*.sqlite' \
+            backend \
+          | ssh -i ~/.ssh/deploy_key \
+                -p "${{ secrets.SSH_PORT }}" \
+                -o StrictHostKeyChecking=accept-new \
+                -o ConnectTimeout=30 \
+                "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+                "tar xzf - -C ~/vote.zeeshanfarooq.site --strip-components=1"
+
+      - name: Clear caches and migrate
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key \
+            -p "${{ secrets.SSH_PORT }}" \
+            -o StrictHostKeyChecking=accept-new \
+            -o ConnectTimeout=30 \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            'cd ~/vote.zeeshanfarooq.site &&
+             mkdir -p public/uploads/candidates &&
+             php artisan optimize:clear &&
+             php artisan migrate --force &&
+             chmod -R 775 storage bootstrap/cache'
