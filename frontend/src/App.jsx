@@ -1922,9 +1922,35 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
       },
     ].filter((cat) => cat.posts.length)
 
-    let sections = ''
+    // Winners first: one short roll-call per council so the result can be read
+    // at a glance. The candidate-by-candidate breakdown follows underneath.
+    let winners = ''
+    let details = ''
+
     for (const cat of cats) {
-      sections += `<h2>${escapeHtml(cat.title)}</h2>`
+      const winnerRows = cat.posts
+        .map((post) => {
+          const list = people.filter((c) => c.position === post).sort((a, b) => b.vote_count - a.vote_count)
+          const win = list[0]
+          const count = win ? Number(win.vote_count) || 0 : 0
+
+          return `<tr>
+            <td class="role">${escapeHtml(prettyText(post))}</td>
+            <td>${count > 0 ? escapeHtml(win.name) : '<span class="none">No votes cast</span>'}</td>
+            <td class="num">${count > 0 ? count : '&mdash;'}</td>
+          </tr>`
+        })
+        .join('')
+
+      winners += `<article class="card">
+        <h3 class="cat">${escapeHtml(cat.title)}</h3>
+        <table class="winners">
+          <thead><tr><th>Designation</th><th>Winner</th><th class="num">Votes</th></tr></thead>
+          <tbody>${winnerRows}</tbody>
+        </table>
+      </article>`
+
+      details += `<h2>${escapeHtml(cat.title)}</h2>`
       for (const post of cat.posts) {
         const list = people.filter((c) => c.position === post).sort((a, b) => b.vote_count - a.vote_count)
         const win = list[0]
@@ -1934,7 +1960,7 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
               `<tr class="${i === 0 ? 'gold' : ''}"><td>${i + 1}</td><td>${escapeHtml(c.name)}</td><td>${Number(c.vote_count) || 0}</td><td>${i === 0 ? 'WINNER' : ''}</td></tr>`,
           )
           .join('')
-        sections += `<article><h3>${escapeHtml(prettyText(post))}</h3>
+        details += `<article><h3>${escapeHtml(prettyText(post))}</h3>
           <p class="win">${win ? `${escapeHtml(win.name)} · ${Number(win.vote_count) || 0} vote${win.vote_count === 1 ? '' : 's'}` : 'No votes'}</p>
           <table><thead><tr><th>#</th><th>Candidate</th><th>Votes</th><th></th></tr></thead><tbody>${rows}</tbody></table></article>`
       }
@@ -1953,6 +1979,16 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
         th,td{border:1px solid #c5d4e0;padding:7px 8px;text-align:left}
         th{background:#0A3B65;color:#FFC72C}
         tr.gold td{background:#FFF4CC;font-weight:700}
+        .card{margin:0 0 14px;break-inside:avoid;page-break-inside:avoid}
+        h3.cat{margin:0 0 6px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#0A3B65;background:#FFF4CC;border-left:4px solid #FFC72C;padding:6px 10px}
+        table.winners{margin-bottom:0;font-size:14px}
+        table.winners th{font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+        table.winners td.role{font-weight:700;width:42%}
+        table.winners td.num,table.winners th.num{text-align:center;width:68px}
+        table.winners tbody tr:nth-child(even) td{background:#F7FAFD}
+        .none{color:#7a8fa3;font-style:italic;font-weight:400}
+        .lede{margin:0 0 18px;font-size:13px;color:#3f5f7d}
+        .full{break-before:page;page-break-before:always}
         @media print{button{display:none}}
       </style></head><body>
       <div style="display:flex;align-items:center;gap:16px">
@@ -1960,7 +1996,11 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
         <div><h1>NJV Govt. Higher Secondary School</h1>
         <p>Student Council Election · official results</p></div>
       </div>
-      ${sections || '<p>No candidates.</p>'}
+      <h2 style="margin-top:24px">Winners</h2>
+      <p class="lede">Designation, elected candidate and votes received. The full candidate breakdown follows from the next page.</p>
+      ${winners || '<p>No candidates.</p>'}
+      <h2 class="full">Full results</h2>
+      ${details || '<p>No candidates.</p>'}
       </body></html>`
     openPrintWindow(html)
   }
