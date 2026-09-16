@@ -188,13 +188,13 @@ function PresentationShow({ board, onExit }) {
                   initial={{ rotateY: 90, opacity: 0 }}
                   animate={{ rotateY: 0, opacity: 1 }}
                   transition={{ delay: 0.08 * i, duration: 0.45 }}
-                  className={`flex h-[76px] w-full min-w-0 items-center gap-3 rounded-2xl border px-3 sm:h-[88px] sm:w-[220px] ${
+                  className={`flex min-h-[76px] w-full min-w-0 items-center gap-3 rounded-2xl border px-3 py-2 sm:min-h-[96px] sm:w-[272px] ${
                     lead ? 'border-[#FFC72C] bg-white/10' : 'border-white/15 bg-[#0A3B65]/55'
                   }`}
                 >
                   <Avatar candidate={c} size={56} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-white">{c.name}</p>
+                    <p className="break-words text-[13px] font-semibold leading-tight text-white sm:text-sm">{c.name}</p>
                     <p className="text-lg font-semibold tabular-nums leading-tight text-[#FFC72C]">{c.vote_count}</p>
                     <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/10">
                       <div
