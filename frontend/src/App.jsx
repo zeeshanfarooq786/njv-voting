@@ -243,15 +243,17 @@ function PresentationShow({ board, onExit }) {
                   initial={entrance.initial}
                   animate={entrance.animate}
                   transition={{ ...entrance.transition, delay: 0.08 * i }}
-                  className={`flex min-h-[108px] w-full min-w-0 items-center gap-4 rounded-3xl border px-4 py-3 sm:min-h-[148px] sm:w-[min(100%,380px)] lg:min-h-[168px] lg:w-[420px] ${
+                  className={`relative flex min-h-[132px] w-full min-w-0 items-center gap-5 rounded-3xl border px-5 py-4 sm:min-h-[180px] sm:w-[min(100%,420px)] lg:min-h-[200px] lg:w-[460px] ${
                     lead ? 'border-[#FFC72C] bg-white/10' : 'border-white/15 bg-[#0A3B65]/55'
                   }`}
                 >
-                  <Avatar candidate={c} size={96} />
-                  <div className="min-w-0 flex-1">
-                    <p className="break-words text-base font-semibold leading-tight text-white sm:text-xl lg:text-2xl">{c.name}</p>
-                    <p className="text-2xl font-semibold tabular-nums leading-tight text-[#FFC72C] sm:text-3xl">{c.vote_count}</p>
-                    <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/10">
+                  {lead && <span className="leading-badge absolute right-4 top-4 z-10">Leading</span>}
+                  <Avatar candidate={c} size={132} />
+                  <div className="min-w-0 flex-1 pr-16">
+                    <p className="break-words text-xl font-semibold leading-tight text-white sm:text-2xl lg:text-3xl">{c.name}</p>
+                    <p className="mt-1 text-4xl font-semibold tabular-nums leading-none text-[#FFC72C] sm:text-5xl">{c.vote_count}</p>
+                    <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/50">votes</p>
+                    <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/10">
                       <div
                         className="h-full rounded-full bg-[#FFC72C]"
                         style={{ width: `${Math.max(8, (c.vote_count / max) * 100)}%` }}
