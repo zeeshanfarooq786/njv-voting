@@ -24,7 +24,7 @@ export function BrandMark({ size = 48, subtitle }) {
         <Crest size={size} glow />
       </span>
       <div className="min-w-0">
-        <p className="brandmark-school truncate font-serif text-[#FFC72C]">
+        <p className="brandmark-school font-serif text-[#FFC72C]">
           NJV GOVT. HIGHER SECONDARY SCHOOL
         </p>
         <p className="brandmark-title truncate font-display text-white">{subtitle || 'KARACHI'}</p>
