@@ -217,13 +217,6 @@ function PresentationShow({ board, onExit }) {
               }}
             />
           ))}
-          {[0, 0.18, 0.36].map((delay) => (
-            <span
-              key={`${index}-ring-${delay}`}
-              className="success-burst pointer-events-none absolute left-1/2 top-1/2 z-[6] h-40 w-40 -translate-x-1/2 -translate-y-1/2"
-              style={{ animation: `burst-ring 1.4s ease-out ${delay}s both infinite` }}
-            />
-          ))}
         </>
       )}
       <div className="mb-3 flex items-start justify-between gap-2">
@@ -278,7 +271,7 @@ function PresentationShow({ board, onExit }) {
                   initial={entrance.initial}
                   animate={entrance.animate}
                   transition={{ ...entrance.transition, delay: 0.08 * i }}
-                  className={`relative flex min-h-[132px] w-full min-w-0 items-center gap-5 rounded-3xl border px-5 py-4 sm:min-h-[180px] sm:w-[min(100%,420px)] lg:min-h-[200px] lg:w-[460px] ${
+                  className={`relative flex min-h-[132px] w-full min-w-0 items-center gap-5 rounded-3xl border px-5 py-4 sm:min-h-[180px] sm:w-[min(100%,520px)] lg:min-h-[200px] lg:w-[560px] ${
                     ended || lead ? 'border-[#FFC72C] bg-white/10' : 'border-white/15 bg-[#0A3B65]/55'
                   }`}
                 >
@@ -297,8 +290,8 @@ function PresentationShow({ board, onExit }) {
                     )}
                     <Avatar candidate={c} size={132} />
                   </div>
-                  <div className="min-w-0 flex-1 pr-16">
-                    <p className="break-words text-xl font-semibold leading-tight text-white sm:text-2xl lg:text-3xl">{c.name}</p>
+                  <div className="min-w-0 flex-1 pr-2">
+                    <p className="hall-name truncate text-white">{c.name}</p>
                     <p className="mt-1 text-4xl font-semibold tabular-nums leading-none text-[#FFC72C] sm:text-5xl">{c.vote_count}</p>
                     <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/50">votes</p>
                     <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/10">

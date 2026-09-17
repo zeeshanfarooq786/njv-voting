@@ -104,6 +104,15 @@ body {
   animation: float-soft 4.5s ease-in-out infinite;
 }
 
+.hall-name {
+  font-family: "Outfit", sans-serif;
+  font-weight: 200;
+  font-size: clamp(1.15rem, 2.4vw, 1.85rem);
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
 .handwrite-title {
   font-family: Georgia, "Times New Roman", serif;
   font-weight: 400;
