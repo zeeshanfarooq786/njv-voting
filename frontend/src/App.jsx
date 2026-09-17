@@ -217,14 +217,6 @@ function PresentationShow({ board, onExit }) {
               }}
             />
           ))}
-          <div
-            className="pointer-events-none absolute left-1/2 top-1/2 z-[6] h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2 opacity-35"
-            style={{
-              background: 'repeating-conic-gradient(from 0deg, #FFC72C 0deg 7deg, transparent 7deg 20deg)',
-              animation: 'rays 14s linear infinite',
-              maskImage: 'radial-gradient(circle, black 18%, transparent 68%)',
-            }}
-          />
           {[0, 0.18, 0.36].map((delay) => (
             <span
               key={`${index}-ring-${delay}`}
