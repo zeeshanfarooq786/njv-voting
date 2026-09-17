@@ -1635,14 +1635,14 @@ function AdminBoard({ user, onLogout, initialResults }) {
               return (
                 <div
                   key={c.id}
-                  className={`relative overflow-hidden rounded-xl border px-3 py-2 ${
+                  className={`relative overflow-hidden rounded-xl border px-3 py-3 ${
                     leading ? 'border-[#FFC72C] bg-white/5 shadow-[0_0_24px_rgba(255,199,44,0.25)]' : 'border-white/10 bg-[#0A3B65]/40'
                   }`}
                 >
                   <span className="absolute inset-x-0 top-0 h-0.5" style={{ background: c.color_tag || '#FFC72C' }} />
-                  <div className="mb-1 flex items-center gap-3">
+                  <div className="mb-1 flex items-center gap-4">
                     <Ring pct={pct} color={c.color_tag}>
-                      <Avatar candidate={c} size={36} showMissing />
+                      <Avatar candidate={c} size={76} showMissing />
                     </Ring>
                     <div className="flex-1">
                       <div className="flex items-baseline justify-between gap-3">
@@ -1726,15 +1726,15 @@ function Stat({ label, value, icon: Icon }) {
 }
 
 function Ring({ pct, color, children }) {
-  const r = 30
+  const r = 46
   const c = 2 * Math.PI * r
   return (
-    <div className="relative" style={{ width: 68, height: 68 }}>
-      <svg className="absolute inset-0" width="68" height="68">
-        <circle cx="34" cy="34" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="4" />
+    <div className="relative shrink-0" style={{ width: 100, height: 100 }}>
+      <svg className="absolute inset-0" width="100" height="100">
+        <circle cx="50" cy="50" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="4" />
         <circle
-          cx="34"
-          cy="34"
+          cx="50"
+          cy="50"
           r={r}
           fill="none"
           stroke={color || '#FFC72C'}
