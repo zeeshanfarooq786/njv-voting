@@ -3,13 +3,13 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, clearAuth, friendlyError, getRole, getToken, getUser, prefetchBallot, readBallot, readPhotoCache, setAuth, writeBallot, writePhotoCache } from './api'
 import Crest, { BrandMark } from './Crest'
 import logo from './assets/logo.png'
+import crown from './assets/crown.png'
 import {
   IconBallot,
   IconChart,
   IconCheck,
   IconClock,
   IconCog,
-  IconCrown,
   IconExit,
   IconEye,
   IconMail,
@@ -264,9 +264,11 @@ function PresentationShow({ board, onExit }) {
                   ) : null}
                   <div className="relative shrink-0">
                     {ended && (
-                      <span className="absolute -top-5 left-1/2 z-10 -translate-x-1/2 text-[#FFC72C] drop-shadow-[0_0_12px_rgba(255,199,44,0.85)]">
-                        <IconCrown size={36} />
-                      </span>
+                      <img
+                        src={crown}
+                        alt=""
+                        className="pointer-events-none absolute -top-8 left-1/2 z-10 w-16 -translate-x-1/2 drop-shadow-[0_4px_12px_rgba(255,199,44,0.75)] sm:w-20"
+                      />
                     )}
                     <Avatar candidate={c} size={132} />
                   </div>
