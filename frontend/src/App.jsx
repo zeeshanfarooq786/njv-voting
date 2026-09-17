@@ -21,7 +21,7 @@ import {
   IconUser,
   IconUsers,
 } from './Icons'
-import AmbientField, { Confetti, RippleLayer, WinnerHall, spawnRipple } from './Particles'
+import AmbientField, { Confetti, RippleLayer, spawnRipple } from './Particles'
 import { cardIn, fadeUp, letter } from './motion'
 import { sounds } from './sounds'
 import { ALL_POSTS, ELECTION_CATEGORIES, categoryForPost, orderedPositions } from './positions'
@@ -201,7 +201,39 @@ function PresentationShow({ board, onExit }) {
 
   return (
     <div className="relative flex h-full min-h-0 flex-col overflow-hidden px-4 py-4 sm:px-8 sm:py-6">
-      <WinnerHall show={ended && !!winner} burstKey={index} />
+      {ended && winner && (
+        <>
+          <Confetti key={`hall-confetti-${index}`} show />
+          {Array.from({ length: 18 }, (_, i) => (
+            <span
+              key={`${index}-spark-${i}`}
+              className="success-sparkle pointer-events-none"
+              style={{
+                left: `${18 + ((i * 37) % 64)}%`,
+                top: `${12 + ((i * 23) % 70)}%`,
+                width: 6 + (i % 5) * 2,
+                height: 6 + (i % 5) * 2,
+                animationDelay: `${(i % 8) * 0.12}s`,
+              }}
+            />
+          ))}
+          <div
+            className="pointer-events-none absolute left-1/2 top-1/2 z-[6] h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2 opacity-35"
+            style={{
+              background: 'repeating-conic-gradient(from 0deg, #FFC72C 0deg 7deg, transparent 7deg 20deg)',
+              animation: 'rays 14s linear infinite',
+              maskImage: 'radial-gradient(circle, black 18%, transparent 68%)',
+            }}
+          />
+          {[0, 0.18, 0.36].map((delay) => (
+            <span
+              key={`${index}-ring-${delay}`}
+              className="success-burst pointer-events-none absolute left-1/2 top-1/2 z-[6] h-40 w-40 -translate-x-1/2 -translate-y-1/2"
+              style={{ animation: `burst-ring 1.4s ease-out ${delay}s both infinite` }}
+            />
+          ))}
+        </>
+      )}
       <div className="mb-3 flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <BrandMark size={72} subtitle={ended ? 'The winners' : 'Live hall'} />
