@@ -9,6 +9,7 @@ import {
   IconCheck,
   IconClock,
   IconCog,
+  IconCrown,
   IconExit,
   IconEye,
   IconMail,
@@ -161,6 +162,7 @@ const TV_ENTRANCES = [
 ]
 
 function PresentationShow({ board, onExit }) {
+  const ended = !board.voting_open
   const [musicOn, setMusicOn] = useState(true)
 
   useEffect(() => {
@@ -189,16 +191,19 @@ function PresentationShow({ board, onExit }) {
   }, [posts.length])
 
   const post = posts[index] || posts[0] || ''
-  const nominees = (board.candidates || []).filter((c) => c.position === post)
+  const field = (board.candidates || []).filter((c) => c.position === post)
+  const ranked = [...field].sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0))
+  const winner = ranked[0] && (ranked[0].vote_count || 0) > 0 ? ranked[0] : null
+  const nominees = ended ? (winner ? [winner] : []) : field
   const cat = categoryForPost(post)?.title || 'Student Council'
-  const max = Math.max(...nominees.map((c) => c.vote_count), 1)
+  const max = Math.max(...field.map((c) => c.vote_count), 1)
   const entrance = TV_ENTRANCES[index % TV_ENTRANCES.length]
 
   return (
     <div className="relative flex h-full min-h-0 flex-col overflow-y-auto px-4 py-4 sm:px-8 sm:py-6">
       <div className="mb-3 flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <BrandMark size={72} subtitle="Live hall" />
+          <BrandMark size={72} subtitle={ended ? 'The winners' : 'Live hall'} />
           <HandwrittenTitle text="NJV Government School Student Council Election 2026" />
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
@@ -235,8 +240,13 @@ function PresentationShow({ board, onExit }) {
             <span className="truncate">{prettyText(post)}</span>
           </p>
           <div className="flex flex-wrap content-start justify-center gap-3">
+            {ended && !winner && (
+              <p className="rounded-2xl border border-white/15 bg-[#0A3B65]/55 px-6 py-8 text-center text-white/70">
+                No votes were cast for this post.
+              </p>
+            )}
             {nominees.map((c, i) => {
-              const lead = nominees.every((o) => o.vote_count <= c.vote_count) && c.vote_count > 0
+              const lead = !ended && nominees.every((o) => o.vote_count <= c.vote_count) && c.vote_count > 0
               return (
                 <motion.div
                   key={`${post}-${c.id}-${index}`}
@@ -244,11 +254,22 @@ function PresentationShow({ board, onExit }) {
                   animate={entrance.animate}
                   transition={{ ...entrance.transition, delay: 0.08 * i }}
                   className={`relative flex min-h-[132px] w-full min-w-0 items-center gap-5 rounded-3xl border px-5 py-4 sm:min-h-[180px] sm:w-[min(100%,420px)] lg:min-h-[200px] lg:w-[460px] ${
-                    lead ? 'border-[#FFC72C] bg-white/10' : 'border-white/15 bg-[#0A3B65]/55'
+                    ended || lead ? 'border-[#FFC72C] bg-white/10' : 'border-white/15 bg-[#0A3B65]/55'
                   }`}
                 >
-                  {lead && <span className="leading-badge absolute right-4 top-4 z-10">Leading</span>}
-                  <Avatar candidate={c} size={132} />
+                  {ended ? (
+                    <span className="leading-badge absolute right-4 top-4 z-10">Elected</span>
+                  ) : lead ? (
+                    <span className="leading-badge absolute right-4 top-4 z-10">Leading</span>
+                  ) : null}
+                  <div className="relative shrink-0">
+                    {ended && (
+                      <span className="absolute -top-5 left-1/2 z-10 -translate-x-1/2 text-[#FFC72C] drop-shadow-[0_0_12px_rgba(255,199,44,0.85)]">
+                        <IconCrown size={36} />
+                      </span>
+                    )}
+                    <Avatar candidate={c} size={132} />
+                  </div>
                   <div className="min-w-0 flex-1 pr-16">
                     <p className="break-words text-xl font-semibold leading-tight text-white sm:text-2xl lg:text-3xl">{c.name}</p>
                     <p className="mt-1 text-4xl font-semibold tabular-nums leading-none text-[#FFC72C] sm:text-5xl">{c.vote_count}</p>
@@ -1428,6 +1449,12 @@ function AdminBoard({ user, onLogout, initialResults }) {
             <Toggle
               open={board.voting_open}
               onChange={(open) => {
+                if (!open) {
+                  const ok = window.confirm(
+                    'Close voting and declare winners? The hall will show only the elected candidate for each post. Booths will stop taking votes.',
+                  )
+                  if (!ok) return
+                }
                 setResults((r) => ({ ...r, voting_open: open }))
                 api.toggleVoting(open).catch(() => setResults((r) => ({ ...r, voting_open: !open })))
               }}
@@ -1611,7 +1638,7 @@ function Toggle({ open, onChange }) {
       onClick={() => onChange(!open)}
       className={`rounded-full px-4 py-2 text-sm font-semibold ${open ? 'bg-[#FFC72C] text-[#0A3B65]' : 'bg-rose-800 text-white'}`}
     >
-      Voting {open ? 'OPEN' : 'CLOSED'}
+      {open ? 'Voting OPEN' : 'Winners declared'}
     </button>
   )
 }

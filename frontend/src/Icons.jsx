@@ -41,6 +41,15 @@ export function IconTrophy(props) {
   )
 }
 
+export function IconCrown(props) {
+  return (
+    <Svg {...props}>
+      <path d="M3 17.5 5.5 8l4.2 5.2L12 6.5l2.3 6.7L18.5 8 21 17.5Z" fill="currentColor" stroke="currentColor" />
+      <path d="M4 20h16" />
+    </Svg>
+  )
+}
+
 export function IconUsers(props) {
   return (
     <Svg {...props}>
