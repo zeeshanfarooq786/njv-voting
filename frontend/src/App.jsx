@@ -127,6 +127,39 @@ function photoRejectReason(file) {
   return ''
 }
 
+const TV_ENTRANCES = [
+  {
+    initial: { scale: 0, rotate: -180, opacity: 0 },
+    animate: { scale: 1, rotate: 0, opacity: 1 },
+    transition: { type: 'spring', stiffness: 260, damping: 14 },
+  },
+  {
+    initial: { y: 80, rotate: 12, opacity: 0 },
+    animate: { y: [80, -18, 0], rotate: [12, -6, 0], opacity: 1 },
+    transition: { duration: 0.7, ease: 'easeOut' },
+  },
+  {
+    initial: { x: -140, rotateY: 90, opacity: 0 },
+    animate: { x: 0, rotateY: 0, opacity: 1 },
+    transition: { type: 'spring', stiffness: 180, damping: 16 },
+  },
+  {
+    initial: { y: -90, scale: 0.4, opacity: 0 },
+    animate: { y: [-90, 16, 0], scale: [0.4, 1.08, 1], opacity: 1 },
+    transition: { duration: 0.65 },
+  },
+  {
+    initial: { scale: 1.6, opacity: 0, filter: 'blur(12px)' },
+    animate: { scale: 1, opacity: 1, filter: 'blur(0px)' },
+    transition: { duration: 0.55 },
+  },
+  {
+    initial: { rotate: -25, y: 40, opacity: 0 },
+    animate: { rotate: [-25, 8, -4, 0], y: 0, opacity: 1 },
+    transition: { duration: 0.8 },
+  },
+]
+
 function PresentationShow({ board, onExit }) {
   const [musicOn, setMusicOn] = useState(true)
 
@@ -159,12 +192,14 @@ function PresentationShow({ board, onExit }) {
   const nominees = (board.candidates || []).filter((c) => c.position === post)
   const cat = categoryForPost(post)?.title || 'Student Council'
   const max = Math.max(...nominees.map((c) => c.vote_count), 1)
+  const entrance = TV_ENTRANCES[index % TV_ENTRANCES.length]
 
   return (
     <div className="relative flex h-full min-h-0 flex-col overflow-y-auto px-4 py-4 sm:px-8 sm:py-6">
       <div className="mb-3 flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <BrandMark size={72} subtitle="Live count" />
+          <BrandMark size={72} subtitle="Live hall" />
+          <HandwrittenTitle text="NJV Government School Student Council Election 2026" />
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           <button
@@ -204,10 +239,10 @@ function PresentationShow({ board, onExit }) {
               const lead = nominees.every((o) => o.vote_count <= c.vote_count) && c.vote_count > 0
               return (
                 <motion.div
-                  key={c.id}
-                  initial={{ rotateY: 90, opacity: 0 }}
-                  animate={{ rotateY: 0, opacity: 1 }}
-                  transition={{ delay: 0.08 * i, duration: 0.45 }}
+                  key={`${post}-${c.id}-${index}`}
+                  initial={entrance.initial}
+                  animate={entrance.animate}
+                  transition={{ ...entrance.transition, delay: 0.08 * i }}
                   className={`flex min-h-[108px] w-full min-w-0 items-center gap-4 rounded-3xl border px-4 py-3 sm:min-h-[148px] sm:w-[min(100%,380px)] lg:min-h-[168px] lg:w-[420px] ${
                     lead ? 'border-[#FFC72C] bg-white/10' : 'border-white/15 bg-[#0A3B65]/55'
                   }`}
@@ -466,14 +501,24 @@ function Splash() {
 }
 
 function HandwrittenTitle({ text }) {
+  const [cycle, setCycle] = useState(0)
+  const letters = text.length
+
+  useEffect(() => {
+    const writeMs = letters * 35 + 400
+    const holdMs = 4200
+    const t = setTimeout(() => setCycle((n) => n + 1), writeMs + holdMs)
+    return () => clearTimeout(t)
+  }, [cycle, letters])
+
   return (
     <p className="handwrite-title mb-5 max-w-3xl font-serif text-[15px] leading-snug text-[#FFC72C] sm:text-lg md:text-xl">
       {text.split('').map((ch, i) => (
         <motion.span
-          key={`${ch}-${i}`}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.035 * i, duration: 0.18 }}
+          key={`${cycle}-${i}`}
+          initial={{ opacity: 0, y: 8, scale: 0.6 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ delay: 0.035 * i, duration: 0.2, type: 'spring', stiffness: 420, damping: 18 }}
           className="inline-block"
         >
           {ch === ' ' ? '\u00A0' : ch}
@@ -638,7 +683,7 @@ function TeacherStation({ user, onLogout, onSession, onRipple }) {
       <WaitOverlay show={busy} title="Getting the ballot ready" hint="Just a moment" />
       <div className="mx-auto w-full max-w-3xl">
       <div className="mb-8 flex items-center justify-between">
-        <BrandMark size={88} subtitle="Your vote. Your voice." />
+        <BrandMark size={88} subtitle="Rise. Choose. Lead." />
         <button onClick={onLogout} className="rounded-full border border-white/20 px-4 py-2 text-sm">
           Logout
         </button>
@@ -834,7 +879,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
       <div className="page-shell flex min-h-0 flex-1 flex-col">
         <header className="mb-4 flex items-center justify-between gap-4">
           <div>
-            <BrandMark size={80} subtitle="Cast your vote" />
+            <BrandMark size={80} />
             <HandwrittenTitle text="NJV Government School Student Council Election 2026" />
             <p className="mt-1 text-xs text-white/55">{session.student_email}</p>
           </div>
