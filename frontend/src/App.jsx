@@ -934,7 +934,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
       transition={{ duration: 0.45, ease: [0.76, 0, 0.24, 1] }}
     >
       <div className="page-shell flex min-h-0 flex-1 flex-col">
-        <header className="mb-4 flex items-center justify-between gap-4">
+        <header className="mb-2 flex shrink-0 items-center justify-between gap-4">
           <div>
             <BrandMark size={80} />
             <HandwrittenTitle text="NJV Government School Student Council Election 2026" />
@@ -945,8 +945,8 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
             Cancel
           </button>
         </header>
-        <div className="flex min-h-0 flex-1 flex-col gap-6 pb-24">
-          <div className="no-scrollbar min-w-0 flex-1 overflow-y-auto pr-1">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 pb-24">
+          <div className={`no-scrollbar min-h-0 min-w-0 flex-1 pr-1 ${reviewing ? 'overflow-y-auto' : 'overflow-hidden'}`}>
             {reviewing ? (
               <div className="max-w-3xl">
                 <p className="mb-1 flex items-center gap-1.5 text-[11px] font-medium tracking-[0.2em] text-[#FFC72C] uppercase">
@@ -989,11 +989,11 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                 </div>
               </div>
             ) : (
-              <div>
-                <p className="mb-1 text-[11px] font-medium tracking-[0.2em] text-[#FFC72C] uppercase">
+              <div className="flex h-full min-h-0 flex-col">
+                <p className="mb-1 shrink-0 text-[11px] font-medium tracking-[0.2em] text-[#FFC72C] uppercase">
                   {currentCat?.title || 'Ballot'}
                 </p>
-                <div className="mb-4 flex items-end justify-between gap-3">
+                <div className="mb-3 flex shrink-0 items-end justify-between gap-3">
                   <h2 className="flex items-center gap-2 text-xl font-medium text-white">
                     <IconUser size={20} className="text-[#FFC72C]" />
                     {prettyText(currentPost)}
@@ -1003,9 +1003,22 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                     {positions.length ? step + 1 : 0}/{positions.length}
                   </p>
                 </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div
+                  className="grid min-h-0 flex-1 content-start gap-3"
+                  style={{
+                    gridTemplateColumns:
+                      currentList.length <= 1
+                        ? 'minmax(0, 1fr)'
+                        : currentList.length <= 4
+                          ? 'repeat(2, minmax(0, 1fr))'
+                          : 'repeat(3, minmax(0, 1fr))',
+                  }}
+                >
                   {currentList.map((c, i) => {
                     const active = picked[currentPost] === c.id
+                    const n = currentList.length
+                    const photo = n <= 2 ? 72 : n <= 4 ? 56 : 44
+                    const pack = n > 2
                     return (
                       <motion.button
                         key={c.id}
@@ -1013,26 +1026,26 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                         variants={cardIn}
                         initial="hidden"
                         animate="show"
-                        whileHover={{ y: -4 }}
+                        whileHover={{ y: -2 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={(e) => {
                           onRipple?.(e)
                           setPicked((cur) => ({ ...cur, [currentPost]: c.id }))
                           sounds.select()
                         }}
-                        className={`vote-card relative overflow-hidden rounded-2xl border p-4 text-left transition ${
-                          active ? 'is-active border-[#FFC72C] bg-white/10' : 'border-white/10 bg-[#0A3B65]/45'
-                        }`}
+                        className={`vote-card relative min-h-0 overflow-hidden rounded-2xl border text-left transition ${
+                          pack ? 'p-3' : 'p-4'
+                        } ${active ? 'is-active border-[#FFC72C] bg-white/10' : 'border-white/10 bg-[#0A3B65]/45'}`}
                       >
                         <span className="absolute inset-x-0 top-0 h-1" style={{ background: c.color_tag || '#FFC72C' }} />
-                        <div className="flex items-center gap-4">
-                          <Avatar candidate={c} size={72} />
+                        <div className={`flex items-center ${pack ? 'gap-3' : 'gap-4'}`}>
+                          <Avatar candidate={c} size={photo} />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-lg font-semibold text-white">{c.name}</p>
+                            <p className={`truncate font-semibold text-white ${pack ? 'text-base' : 'text-lg'}`}>{c.name}</p>
                             <p className="text-xs font-semibold text-secondary">{prettyText(c.position)}</p>
                           </div>
                           <motion.span
-                            className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs font-bold ${
+                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-bold ${
                               active ? 'border-[#FFC72C] bg-[#FFC72C] text-[#0A3B65]' : 'border-white/25 text-white/40'
                             }`}
                             animate={active ? { scale: [1, 1.15, 1] } : { scale: 1 }}
