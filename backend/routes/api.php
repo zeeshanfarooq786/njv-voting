@@ -31,6 +31,7 @@ Route::middleware(['auth:sanctum', 'role:admin', 'throttle:240,1'])->group(funct
     Route::put('/admin/candidates/{candidate}', [AdminController::class, 'updateCandidate']);
     Route::delete('/admin/candidates/{candidate}', [AdminController::class, 'destroyCandidate']);
     Route::post('/admin/voting/toggle', [AdminController::class, 'toggleVoting']);
+    Route::post('/admin/voting/declare', [AdminController::class, 'declareWinners']);
     Route::get('/admin/settings', [AdminController::class, 'settings']);
     Route::post('/admin/settings', [AdminController::class, 'updateSettings']);
     Route::put('/admin/settings', [AdminController::class, 'updateSettings']);

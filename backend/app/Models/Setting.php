@@ -41,6 +41,11 @@ class Setting extends Model
         return static::getValue('voting_open', '1') === '1';
     }
 
+    public static function winnersDeclared(): bool
+    {
+        return static::getValue('winners_declared', '0') === '1';
+    }
+
     public static function electionTitle(): string
     {
         return (string) static::getValue('election_title', 'NJV Government School Student Council Election');

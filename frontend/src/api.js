@@ -176,6 +176,7 @@ export const api = {
   events: (after_id = 0) => request(`/admin/events?after_id=${after_id}`),
   votes: () => request('/admin/votes'),
   toggleVoting: (open) => request('/admin/voting/toggle', { method: 'POST', json: { open: Boolean(open) } }),
+  declareWinners: () => request('/admin/voting/declare', { method: 'POST' }),
   settings: () => request('/admin/settings'),
   updateSettings: (body) => request('/admin/settings', { method: 'POST', json: body }),
   teachers: () => request('/admin/teachers'),

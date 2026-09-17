@@ -40,6 +40,7 @@ class AdminController extends Controller
         return response()->json([
             'election_title' => Setting::electionTitle(),
             'voting_open' => Setting::votingOpen(),
+            'winners_declared' => Setting::winnersDeclared(),
             'eligible_students' => $eligible,
             'total_votes' => $totalVotes,
             'turnout_percent' => $eligible > 0 ? round(($totalVotes / $eligible) * 100, 1) : 0,
@@ -161,9 +162,24 @@ class AdminController extends Controller
         ]);
 
         Setting::setValue('voting_open', $data['open']);
+        if ($data['open']) {
+            Setting::setValue('winners_declared', false);
+        }
 
         return response()->json([
             'voting_open' => Setting::votingOpen(),
+            'winners_declared' => Setting::winnersDeclared(),
+        ]);
+    }
+
+    public function declareWinners(): JsonResponse
+    {
+        Setting::setValue('voting_open', false);
+        Setting::setValue('winners_declared', true);
+
+        return response()->json([
+            'voting_open' => false,
+            'winners_declared' => true,
         ]);
     }
 
@@ -174,6 +190,7 @@ class AdminController extends Controller
             'eligible_students' => Setting::eligibleStudents(),
             'total_eligible_students' => Setting::eligibleStudents(),
             'voting_open' => Setting::votingOpen(),
+            'winners_declared' => Setting::winnersDeclared(),
         ]);
     }
 
@@ -199,6 +216,7 @@ class AdminController extends Controller
             'eligible_students' => Setting::eligibleStudents(),
             'total_eligible_students' => Setting::eligibleStudents(),
             'voting_open' => Setting::votingOpen(),
+            'winners_declared' => Setting::winnersDeclared(),
         ]);
     }
 

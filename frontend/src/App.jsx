@@ -162,7 +162,7 @@ const TV_ENTRANCES = [
 ]
 
 function PresentationShow({ board, onExit }) {
-  const ended = !board.voting_open
+  const ended = !!board.winners_declared
   const [musicOn, setMusicOn] = useState(true)
 
   useEffect(() => {
@@ -211,8 +211,8 @@ function PresentationShow({ board, onExit }) {
               style={{
                 left: `${18 + ((i * 37) % 64)}%`,
                 top: `${12 + ((i * 23) % 70)}%`,
-                width: 6 + (i % 5) * 2,
-                height: 6 + (i % 5) * 2,
+                width: 16 + (i % 5) * 4,
+                height: 16 + (i % 5) * 4,
                 animationDelay: `${(i % 8) * 0.12}s`,
               }}
             />
@@ -770,6 +770,7 @@ function emptyBoard() {
   return {
     election_title: 'NJV Student Council Election 2026-27',
     voting_open: true,
+    winners_declared: false,
     eligible_students: 450,
     total_votes: 0,
     turnout_percent: 0,
@@ -1313,6 +1314,7 @@ function AdminBoard({ user, onLogout, initialResults }) {
   const [results, setResults] = useState(() => hydrateResults(initialResults || readCachedResults()) || emptyBoard())
   const [events, setEvents] = useState([])
   const [present, setPresent] = useState(false)
+  const [closeMenu, setCloseMenu] = useState(false)
   const [leaderFlash, setLeaderFlash] = useState(null)
   const [loadError, setLoadError] = useState('')
   const afterId = useRef(0)
@@ -1468,15 +1470,14 @@ function AdminBoard({ user, onLogout, initialResults }) {
           <div className="flex flex-wrap items-center gap-2">
             <Toggle
               open={board.voting_open}
+              declared={board.winners_declared}
               onChange={(open) => {
                 if (!open) {
-                  const ok = window.confirm(
-                    'Close voting and declare winners? The hall will show only the elected candidate for each post. Booths will stop taking votes.',
-                  )
-                  if (!ok) return
+                  setCloseMenu(true)
+                  return
                 }
-                setResults((r) => ({ ...r, voting_open: open }))
-                api.toggleVoting(open).catch(() => setResults((r) => ({ ...r, voting_open: !open })))
+                setResults((r) => ({ ...r, voting_open: true, winners_declared: false }))
+                api.toggleVoting(true).catch(() => setResults((r) => ({ ...r, voting_open: false })))
               }}
             />
             <button
@@ -1495,6 +1496,50 @@ function AdminBoard({ user, onLogout, initialResults }) {
             </button>
           </div>
         </header>
+      )}
+
+      {closeMenu && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#0A3B65]/70 px-4 backdrop-blur-md">
+          <div className="w-full max-w-lg rounded-3xl border border-[#FFC72C]/40 bg-[#0A3B65] p-6 shadow-[0_0_80px_rgba(255,199,44,0.25)]">
+            <p className="font-display text-2xl tracking-wide text-[#FFC72C]">Close the hall?</p>
+            <p className="mt-2 text-sm text-white/75">
+              Choose how to stop the live count. You can pause quietly, or crown the winners on the projector.
+            </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                className="rounded-2xl border border-white/20 bg-white/5 px-4 py-4 text-left"
+                onClick={() => {
+                  setCloseMenu(false)
+                  setResults((r) => ({ ...r, voting_open: false, winners_declared: false }))
+                  api.toggleVoting(false).catch(() => setResults((r) => ({ ...r, voting_open: true })))
+                }}
+              >
+                <p className="text-sm font-semibold text-white">Pause voting</p>
+                <p className="mt-1 text-xs text-white/60">Booths stop. The hall still shows every candidate.</p>
+              </button>
+              <button
+                type="button"
+                className="rounded-2xl border border-[#FFC72C]/50 bg-[#FFC72C]/15 px-4 py-4 text-left"
+                onClick={() => {
+                  setCloseMenu(false)
+                  setResults((r) => ({ ...r, voting_open: false, winners_declared: true }))
+                  api.declareWinners().catch(() => setResults((r) => ({ ...r, voting_open: true, winners_declared: false })))
+                }}
+              >
+                <p className="text-sm font-semibold text-[#FFC72C]">Declare winners</p>
+                <p className="mt-1 text-xs text-white/60">Booths stop. The hall shows only crowned winners.</p>
+              </button>
+            </div>
+            <button
+              type="button"
+              className="mt-4 w-full rounded-full border border-white/15 py-2 text-sm text-white/70"
+              onClick={() => setCloseMenu(false)}
+            >
+              Keep voting open
+            </button>
+          </div>
+        </div>
       )}
 
       {present ? (
@@ -1652,13 +1697,14 @@ function Ring({ pct, color, children }) {
   )
 }
 
-function Toggle({ open, onChange }) {
+function Toggle({ open, declared, onChange }) {
+  const label = open ? 'Voting OPEN' : declared ? 'Winners declared' : 'Voting paused'
   return (
     <button
       onClick={() => onChange(!open)}
       className={`rounded-full px-4 py-2 text-sm font-semibold ${open ? 'bg-[#FFC72C] text-[#0A3B65]' : 'bg-rose-800 text-white'}`}
     >
-      {open ? 'Voting OPEN' : 'Winners declared'}
+      {label}
     </button>
   )
 }
