@@ -258,7 +258,7 @@ function PresentationShow({ board, onExit }) {
             <span className="truncate">{prettyText(post)}</span>
           </p>
           <div
-            className="grid min-h-0 flex-1 content-center items-stretch justify-items-stretch gap-3 overflow-hidden"
+            className="grid min-h-0 flex-1 content-start items-stretch justify-items-stretch gap-3 overflow-hidden"
             style={{
               gridTemplateColumns:
                 ended || nominees.length <= 1
