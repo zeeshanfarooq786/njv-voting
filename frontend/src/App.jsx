@@ -128,6 +128,25 @@ function photoRejectReason(file) {
   return ''
 }
 
+function AlertBox({ title, message, onClose }) {
+  if (!message) return null
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[#0A3B65]/70 px-4 backdrop-blur-md">
+      <div className="w-full max-w-md rounded-3xl border border-[#FFC72C]/40 bg-[#0A3B65] p-6 shadow-[0_0_80px_rgba(255,199,44,0.25)]">
+        <p className="font-display text-2xl tracking-wide text-[#FFC72C]">{title}</p>
+        <p className="mt-3 text-sm leading-relaxed text-white/80">{message}</p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="btn-gold mt-6 w-full rounded-full py-2.5 text-sm font-semibold"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  )
+}
+
 const TV_ENTRANCES = [
   {
     initial: { scale: 0, rotate: -180, opacity: 0 },
@@ -2120,6 +2139,7 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
   const [preview, setPreview] = useState('')
   const [eligible, setEligible] = useState(results.eligible_students ?? 0)
   const [msg, setMsg] = useState('')
+  const [photoAlert, setPhotoAlert] = useState('')
   const [busy, setBusy] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [editName, setEditName] = useState('')
@@ -2267,7 +2287,7 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
   function onPhoto(file) {
     const reject = photoRejectReason(file)
     if (reject) {
-      note(reject)
+      setPhotoAlert(reject)
       return
     }
     setPhoto(file)
@@ -2325,7 +2345,7 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
     if (!file) return
     const reject = photoRejectReason(file)
     if (reject) {
-      note(reject)
+      setPhotoAlert(reject)
       return
     }
     const current = results.candidates.find((x) => x.id === candidateId)
@@ -2389,6 +2409,7 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
   return (
     <div className="no-scrollbar relative flex min-h-0 flex-col overflow-y-auto pr-1">
       <WaitOverlay show={busy} title="Saving" hint="Just a moment" />
+      <AlertBox title="Can't use this photo" message={photoAlert} onClose={() => setPhotoAlert('')} />
       <p className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-[0.3em] text-[#FFC72C]">
         <IconCog size={14} />
         ADMIN CONTROLS
