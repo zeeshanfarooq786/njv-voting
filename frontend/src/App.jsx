@@ -145,8 +145,8 @@ const TV_ENTRANCES = [
     transition: { type: 'spring', stiffness: 180, damping: 16 },
   },
   {
-    initial: { y: -90, scale: 0.4, opacity: 0 },
-    animate: { y: [-90, 16, 0], scale: [0.4, 1.08, 1], opacity: 1 },
+    initial: { y: 40, scale: 0.4, opacity: 0 },
+    animate: { y: [40, -8, 0], scale: [0.4, 1.08, 1], opacity: 1 },
     transition: { duration: 0.65 },
   },
   {
@@ -219,7 +219,7 @@ function PresentationShow({ board, onExit }) {
           ))}
         </>
       )}
-      <div className="mb-3 flex items-start justify-between gap-2">
+      <div className="relative z-20 mb-3 flex shrink-0 items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <BrandMark size={72} subtitle={ended ? 'The winners' : 'Live hall'} />
           <HandwrittenTitle text="NJV Government School Student Council Election 2026" />
@@ -241,7 +241,7 @@ function PresentationShow({ board, onExit }) {
           </button>
         </div>
       </div>
-      <div style={{ perspective: 1400 }} className="flex min-h-0 flex-1 flex-col">
+      <div style={{ perspective: 1400 }} className="relative z-10 flex min-h-0 flex-1 flex-col overflow-visible">
       <AnimatePresence mode="wait">
         <motion.div
           key={post}
@@ -258,7 +258,7 @@ function PresentationShow({ board, onExit }) {
             <span className="truncate">{prettyText(post)}</span>
           </p>
           <div
-            className="grid min-h-0 flex-1 content-start items-stretch justify-items-stretch gap-3 overflow-hidden"
+            className={`grid min-h-0 flex-1 content-start items-stretch justify-items-stretch gap-3 overflow-visible ${ended ? 'pt-10' : 'pt-2'}`}
             style={{
               gridTemplateColumns:
                 ended || nominees.length <= 1
