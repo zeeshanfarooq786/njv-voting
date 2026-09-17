@@ -106,7 +106,7 @@ body {
 
 .handwrite-title {
   font-family: "Outfit", sans-serif;
-  font-weight: 100;
+  font-weight: 200;
   font-style: normal;
   letter-spacing: 0.04em;
 }
@@ -426,7 +426,7 @@ input:disabled,
 
 .brandmark-title {
   font-family: "Outfit", sans-serif;
-  font-weight: 100;
+  font-weight: 200;
   font-size: clamp(0.85rem, 4.2vw, 1.5rem);
   letter-spacing: 0.06em;
   line-height: 1.15;
@@ -434,7 +434,7 @@ input:disabled,
 
 .font-display {
   font-family: "Outfit", sans-serif;
-  font-weight: 100;
+  font-weight: 200;
 }
 
 @media (min-width: 768px) {
