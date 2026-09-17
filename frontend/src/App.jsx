@@ -959,7 +959,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                     const c = (data?.candidates || []).find((row) => row.id === picked[position])
                     return (
                       <div key={position} className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#0A3B65]/45 px-3 py-2">
-                        {c ? <Avatar candidate={c} size={40} /> : null}
+                        {c ? <Avatar candidate={c} size={56} /> : null}
                         <div className="min-w-0 flex-1">
                           <p className="text-[11px] text-[#FFC72C]">{prettyText(position)}</p>
                           <p className="truncate text-sm font-medium text-white">{c?.name || 'Not selected'}</p>
@@ -1017,7 +1017,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                   {currentList.map((c, i) => {
                     const active = picked[currentPost] === c.id
                     const n = currentList.length
-                    const photo = n <= 2 ? 72 : n <= 4 ? 56 : 44
+                    const photo = n <= 2 ? 96 : n <= 4 ? 76 : 64
                     const pack = n > 2
                     return (
                       <motion.button
