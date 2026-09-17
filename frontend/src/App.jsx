@@ -21,7 +21,7 @@ import {
   IconUser,
   IconUsers,
 } from './Icons'
-import AmbientField, { Confetti, RippleLayer, WinnerBurst, spawnRipple } from './Particles'
+import AmbientField, { Confetti, RippleLayer, WinnerHall, spawnRipple } from './Particles'
 import { cardIn, fadeUp, letter } from './motion'
 import { sounds } from './sounds'
 import { ALL_POSTS, ELECTION_CATEGORIES, categoryForPost, orderedPositions } from './positions'
@@ -200,7 +200,8 @@ function PresentationShow({ board, onExit }) {
   const entrance = TV_ENTRANCES[index % TV_ENTRANCES.length]
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col overflow-y-auto px-4 py-4 sm:px-8 sm:py-6">
+    <div className="relative flex h-full min-h-0 flex-col overflow-hidden px-4 py-4 sm:px-8 sm:py-6">
+      <WinnerHall show={ended && !!winner} burstKey={index} />
       <div className="mb-3 flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <BrandMark size={72} subtitle={ended ? 'The winners' : 'Live hall'} />
@@ -253,11 +254,10 @@ function PresentationShow({ board, onExit }) {
                   initial={entrance.initial}
                   animate={entrance.animate}
                   transition={{ ...entrance.transition, delay: 0.08 * i }}
-                  className={`relative overflow-visible flex min-h-[132px] w-full min-w-0 items-center gap-5 rounded-3xl border px-5 py-4 sm:min-h-[180px] sm:w-[min(100%,420px)] lg:min-h-[200px] lg:w-[460px] ${
+                  className={`relative flex min-h-[132px] w-full min-w-0 items-center gap-5 rounded-3xl border px-5 py-4 sm:min-h-[180px] sm:w-[min(100%,420px)] lg:min-h-[200px] lg:w-[460px] ${
                     ended || lead ? 'border-[#FFC72C] bg-white/10' : 'border-white/15 bg-[#0A3B65]/55'
                   }`}
                 >
-                  {ended && <WinnerBurst />}
                   {ended ? (
                     <span className="leading-badge absolute right-4 top-4 z-10">Elected</span>
                   ) : lead ? (

@@ -47,38 +47,58 @@ export default function AmbientField() {
   )
 }
 
-export function WinnerBurst() {
-  const shards = Array.from({ length: 28 }, (_, i) => {
-    const angle = (i / 28) * 360
-    const dist = 70 + (i % 5) * 18
-    const rad = (angle * Math.PI) / 180
-    return {
-      id: i,
-      x: Math.cos(rad) * dist,
-      y: Math.sin(rad) * dist,
-      rot: angle,
-      delay: (i % 7) * 0.04,
-      color: i % 3 === 0 ? '#FFC72C' : i % 3 === 1 ? '#FFFFFF' : '#FEBD25',
-      w: 5 + (i % 3) * 2,
-      h: 10 + (i % 4) * 3,
-    }
-  })
+export function WinnerHall({ show, burstKey = 0 }) {
+  if (!show) return null
+
+  const bits = Array.from({ length: 90 }, (_, i) => ({
+    id: `${burstKey}-${i}`,
+    left: Math.random() * 100,
+    delay: Math.random() * 4,
+    dur: 4.2 + Math.random() * 3.5,
+    sway: 18 + Math.random() * 36,
+    color: i % 4 === 0 ? '#FFC72C' : i % 4 === 1 ? '#FFFFFF' : i % 4 === 2 ? '#FEBD25' : '#2A74A8',
+    w: 6 + (i % 5) * 2,
+    h: 10 + (i % 4) * 4,
+    rot: Math.random() * 360,
+  }))
+
+  const sparks = Array.from({ length: 18 }, (_, i) => ({
+    id: `s-${burstKey}-${i}`,
+    left: 8 + Math.random() * 84,
+    top: 10 + Math.random() * 70,
+    delay: Math.random() * 2,
+    size: 6 + (i % 4) * 4,
+  }))
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-20 overflow-visible">
-      <span className="winner-glow" />
-      {shards.map((s) => (
+    <div className="pointer-events-none absolute inset-0 z-[25] overflow-hidden">
+      <span className="winner-wash" />
+      {sparks.map((s) => (
         <span
           key={s.id}
-          className="winner-shard"
+          className="winner-spark"
           style={{
-            width: s.w,
-            height: s.h,
-            background: s.color,
+            left: `${s.left}%`,
+            top: `${s.top}%`,
+            width: s.size,
+            height: s.size,
             animationDelay: `${s.delay}s`,
-            '--dx': `${s.x}px`,
-            '--dy': `${s.y}px`,
-            '--rot': `${s.rot}deg`,
+          }}
+        />
+      ))}
+      {bits.map((b) => (
+        <span
+          key={b.id}
+          className="winner-fall"
+          style={{
+            left: `${b.left}%`,
+            width: b.w,
+            height: b.h,
+            background: b.color,
+            animationDuration: `${b.dur}s`,
+            animationDelay: `${b.delay}s`,
+            '--sway': `${b.sway}px`,
+            '--spin': `${b.rot}deg`,
           }}
         />
       ))}
