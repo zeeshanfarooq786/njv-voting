@@ -1341,6 +1341,7 @@ function AdminBoard({ user, onLogout, initialResults }) {
   const [events, setEvents] = useState([])
   const [present, setPresent] = useState(false)
   const [closeMenu, setCloseMenu] = useState(false)
+  const [openCat, setOpenCat] = useState('executive')
   const [leaderFlash, setLeaderFlash] = useState(null)
   const [loadError, setLoadError] = useState('')
   const afterId = useRef(0)
@@ -1585,7 +1586,7 @@ function AdminBoard({ user, onLogout, initialResults }) {
               {missingPhotos} candidate{missingPhotos === 1 ? '' : 's'} still missing a photo. Upload one before the election goes live.
             </p>
           )}
-          <div className="space-y-8">
+          <div className="space-y-3">
             {[
               ...ELECTION_CATEGORIES.map((cat) => ({
                 ...cat,
@@ -1598,10 +1599,33 @@ function AdminBoard({ user, onLogout, initialResults }) {
               },
             ]
               .filter((cat) => cat.people.length)
-              .map((cat) => (
-                <div key={cat.id}>
-                  <h2 className="mb-2 text-[11px] font-semibold tracking-[0.18em] text-[#FFC72C] uppercase">{cat.title}</h2>
-                  <div className="space-y-2">
+              .map((cat) => {
+                const open = openCat === cat.id
+                const votes = cat.people.reduce((n, c) => n + (c.vote_count || 0), 0)
+                const heading = cat.title.replace(/^\d+\.\s*/, '')
+                return (
+                <div
+                  key={cat.id}
+                  className={`overflow-hidden rounded-2xl border ${
+                    open ? 'border-[#FFC72C]/55 bg-[#0A3B65]/50 shadow-[0_0_28px_rgba(255,199,44,0.12)]' : 'border-white/12 bg-[#0A3B65]/35'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenCat(open ? '' : cat.id)}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left"
+                  >
+                    <span className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${open ? 'bg-[#FFC72C] text-[#0A3B65]' : 'bg-white/10 text-[#FFC72C]'}`}>
+                      {cat.people.length}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-display text-lg tracking-wide text-white">{heading}</span>
+                      <span className="text-[11px] uppercase tracking-[0.16em] text-[#FFC72C]/80">{votes} votes</span>
+                    </span>
+                    <span className={`text-[#FFC72C] transition-transform ${open ? 'rotate-180' : ''}`}>▾</span>
+                  </button>
+                  {open && (
+                  <div className="space-y-2 border-t border-white/10 px-3 pb-3 pt-2">
             {cat.people.map((c) => {
               const pct = Math.round((c.vote_count / total) * 100)
               const width = Math.max(6, (c.vote_count / max) * 100)
@@ -1647,8 +1671,10 @@ function AdminBoard({ user, onLogout, initialResults }) {
               )
             })}
                   </div>
+                  )}
                 </div>
-              ))}
+                )
+              })}
           </div>
         </div>
         {!present && (
