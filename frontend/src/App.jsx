@@ -164,7 +164,7 @@ function PresentationShow({ board, onExit }) {
     <div className="relative flex h-full min-h-0 flex-col overflow-y-auto px-4 py-4 sm:px-8 sm:py-6">
       <div className="mb-3 flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <BrandMark size={44} subtitle="Live count" />
+          <BrandMark size={72} subtitle="Live count" />
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           <button
@@ -208,14 +208,14 @@ function PresentationShow({ board, onExit }) {
                   initial={{ rotateY: 90, opacity: 0 }}
                   animate={{ rotateY: 0, opacity: 1 }}
                   transition={{ delay: 0.08 * i, duration: 0.45 }}
-                  className={`flex min-h-[76px] w-full min-w-0 items-center gap-3 rounded-2xl border px-3 py-2 sm:min-h-[96px] sm:w-[272px] ${
+                  className={`flex min-h-[108px] w-full min-w-0 items-center gap-4 rounded-3xl border px-4 py-3 sm:min-h-[148px] sm:w-[min(100%,380px)] lg:min-h-[168px] lg:w-[420px] ${
                     lead ? 'border-[#FFC72C] bg-white/10' : 'border-white/15 bg-[#0A3B65]/55'
                   }`}
                 >
-                  <Avatar candidate={c} size={56} />
+                  <Avatar candidate={c} size={96} />
                   <div className="min-w-0 flex-1">
-                    <p className="break-words text-[13px] font-semibold leading-tight text-white sm:text-sm">{c.name}</p>
-                    <p className="text-lg font-semibold tabular-nums leading-tight text-[#FFC72C]">{c.vote_count}</p>
+                    <p className="break-words text-base font-semibold leading-tight text-white sm:text-xl lg:text-2xl">{c.name}</p>
+                    <p className="text-2xl font-semibold tabular-nums leading-tight text-[#FFC72C] sm:text-3xl">{c.vote_count}</p>
                     <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/10">
                       <div
                         className="h-full rounded-full bg-[#FFC72C]"
@@ -278,6 +278,39 @@ export default function App() {
     const t = setTimeout(() => setBooting(false), 3800)
     return () => clearTimeout(t)
   }, [booting])
+
+  function forceLogout(mode = loginMode) {
+    const role = getRole()
+    if (role === 'admin' || role === 'teacher') api.logout(role).catch(() => {})
+    clearAuth()
+    setAdminSeed(null)
+    setUser(null)
+    setSession(null)
+    setVoteResult(null)
+    setLoginMode(mode === 'admin' ? 'admin' : 'teacher')
+    setScreen('login')
+  }
+
+  useEffect(() => {
+    const role = getRole()
+    const token = getToken()
+    if (!token || (role !== 'admin' && role !== 'teacher')) return undefined
+
+    let cancelled = false
+    api.me(role).catch((err) => {
+      if (cancelled) return
+      if (err?.status === 401 || /unauthenticated/i.test(String(err?.message || ''))) {
+        forceLogout(role)
+      }
+    })
+
+    const onUnauth = () => forceLogout(getRole() || loginMode)
+    window.addEventListener('njv:unauthenticated', onUnauth)
+    return () => {
+      cancelled = true
+      window.removeEventListener('njv:unauthenticated', onUnauth)
+    }
+  }, [])
 
   return (
     <div className="mesh-bg relative min-h-screen overflow-hidden">
@@ -429,6 +462,24 @@ function Splash() {
         transition={{ delay: 2.1, duration: 0.7 }}
       />
     </motion.div>
+  )
+}
+
+function HandwrittenTitle({ text }) {
+  return (
+    <p className="handwrite-title mb-5 max-w-3xl font-serif text-[15px] leading-snug text-[#FFC72C] sm:text-lg md:text-xl">
+      {text.split('').map((ch, i) => (
+        <motion.span
+          key={`${ch}-${i}`}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.035 * i, duration: 0.18 }}
+          className="inline-block"
+        >
+          {ch === ' ' ? '\u00A0' : ch}
+        </motion.span>
+      ))}
+    </p>
   )
 }
 
@@ -584,19 +635,20 @@ function TeacherStation({ user, onLogout, onSession, onRipple }) {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.35 }}
     >
-      <WaitOverlay show={busy} title="Opening booth" hint="Just a moment" />
+      <WaitOverlay show={busy} title="Getting the ballot ready" hint="Just a moment" />
       <div className="mx-auto w-full max-w-3xl">
       <div className="mb-8 flex items-center justify-between">
-        <BrandMark size={56} subtitle="Teacher Desk" />
+        <BrandMark size={88} subtitle="Your vote. Your voice." />
         <button onClick={onLogout} className="rounded-full border border-white/20 px-4 py-2 text-sm">
           Logout
         </button>
       </div>
-      <p className="mb-4 text-sm text-secondary">{user?.name} · Polling station</p>
+      <HandwrittenTitle text="NJV Government School Student Council Election 2026" />
+      <p className="mb-4 text-sm text-secondary">{user?.name}</p>
       <form onSubmit={start} className="glass rounded-3xl p-8">
         <p className="mb-4 flex items-center gap-2 text-sm text-secondary">
           <IconMail size={15} className="text-[#FFC72C]" />
-          Enter the student's @{DOMAIN} email. One vote per student.
+          One student. One voice. Enter your school email and choose your council.
         </p>
         <input
           className="w-full rounded-2xl border border-white/10 bg-[#0A3B65]/50 px-5 py-4 text-xl outline-none focus:border-[#FFC72C]"
@@ -610,7 +662,7 @@ function TeacherStation({ user, onLogout, onSession, onRipple }) {
           disabled={busy}
           className="btn-gold mt-6 w-full rounded-2xl py-4 text-lg font-bold uppercase tracking-widest"
         >
-          {busy ? 'Opening booth…' : 'Start voting booth'}
+          {busy ? 'Getting ready…' : 'Begin voting'}
         </button>
       </form>
       </div>
@@ -747,7 +799,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
           const d = await session.ready
           tok = d.session_token
         }
-        if (!tok) throw new Error('Booth is not ready yet. Try again.')
+        if (!tok) throw new Error('The ballot is not ready yet. Try again.')
         return api.vote(tok, ids)
       })(),
     })
@@ -782,7 +834,8 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
       <div className="page-shell flex min-h-0 flex-1 flex-col">
         <header className="mb-4 flex items-center justify-between gap-4">
           <div>
-            <BrandMark size={40} subtitle="Booth" />
+            <BrandMark size={80} subtitle="Cast your vote" />
+            <HandwrittenTitle text="NJV Government School Student Council Election 2026" />
             <p className="mt-1 text-xs text-white/55">{session.student_email}</p>
           </div>
           <button onClick={onCancel} className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-4 py-2 text-sm">
@@ -790,7 +843,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
             Cancel
           </button>
         </header>
-        <div className="flex min-h-0 flex-1 flex-col gap-6 pb-24 lg:flex-row">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 pb-24">
           <div className="no-scrollbar min-w-0 flex-1 overflow-y-auto pr-1">
             {reviewing ? (
               <div className="max-w-3xl">
@@ -893,16 +946,6 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
               </div>
             )}
           </div>
-          <aside className="hidden w-72 shrink-0 flex-col rounded-3xl border border-[#FFC72C]/25 bg-[#0A3B65]/50 p-6 xl:flex">
-            <div className="flex flex-1 flex-col items-center justify-center text-center">
-              <div className="crest-float">
-                <Crest size={118} glow />
-              </div>
-              <p className="mt-5 text-xs font-semibold tracking-[0.28em] text-[#FFC72C] uppercase">Election booth</p>
-              <p className="mt-2 text-sm text-secondary">{data?.election_title || 'NJV Student Elections 2026'}</p>
-              <p className="mt-6 text-sm text-secondary">{positions.length} position{positions.length === 1 ? '' : 's'} on the ballot</p>
-            </div>
-          </aside>
         </div>
       </div>
 

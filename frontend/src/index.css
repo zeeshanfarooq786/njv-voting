@@ -104,6 +104,12 @@ body {
   animation: float-soft 4.5s ease-in-out infinite;
 }
 
+.handwrite-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
 @keyframes burst-ring {
   0% { transform: scale(0.2); opacity: 0.85; }
   100% { transform: scale(2.8); opacity: 0; }

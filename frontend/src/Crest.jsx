@@ -20,7 +20,9 @@ export default function Crest({ size = 56, className = '', glow = false }) {
 export function BrandMark({ size = 48, subtitle }) {
   return (
     <div className="brandmark flex min-w-0 items-center gap-2 sm:gap-3">
-      <Crest size={size} />
+      <span className="crest-float inline-flex">
+        <Crest size={size} glow />
+      </span>
       <div className="min-w-0">
         <p className="brandmark-school truncate font-serif text-[#FFC72C]">
           NJV GOVT. HIGHER SECONDARY SCHOOL
