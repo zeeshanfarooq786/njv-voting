@@ -47,6 +47,45 @@ export default function AmbientField() {
   )
 }
 
+export function WinnerBurst() {
+  const shards = Array.from({ length: 28 }, (_, i) => {
+    const angle = (i / 28) * 360
+    const dist = 70 + (i % 5) * 18
+    const rad = (angle * Math.PI) / 180
+    return {
+      id: i,
+      x: Math.cos(rad) * dist,
+      y: Math.sin(rad) * dist,
+      rot: angle,
+      delay: (i % 7) * 0.04,
+      color: i % 3 === 0 ? '#FFC72C' : i % 3 === 1 ? '#FFFFFF' : '#FEBD25',
+      w: 5 + (i % 3) * 2,
+      h: 10 + (i % 4) * 3,
+    }
+  })
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-20 overflow-visible">
+      <span className="winner-glow" />
+      {shards.map((s) => (
+        <span
+          key={s.id}
+          className="winner-shard"
+          style={{
+            width: s.w,
+            height: s.h,
+            background: s.color,
+            animationDelay: `${s.delay}s`,
+            '--dx': `${s.x}px`,
+            '--dy': `${s.y}px`,
+            '--rot': `${s.rot}deg`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
 export function Confetti({ show }) {
   if (!show) return null
   const bits = Array.from({ length: 80 }, (_, i) => ({

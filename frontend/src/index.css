@@ -111,6 +111,38 @@ body {
   letter-spacing: 0.02em;
 }
 
+@keyframes winner-burst {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--rot)) translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(calc(var(--rot) + 90deg)) translate(var(--dx), var(--dy)) scale(0.4);
+  }
+}
+
+@keyframes winner-glow {
+  0%, 100% { opacity: 0.35; transform: scale(0.92); }
+  50% { opacity: 0.85; transform: scale(1.08); }
+}
+
+.winner-shard {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 2px;
+  animation: winner-burst 1.35s ease-out infinite;
+}
+
+.winner-glow {
+  position: absolute;
+  inset: -18%;
+  border-radius: 28px;
+  background: radial-gradient(circle, rgba(255, 199, 44, 0.35) 0%, transparent 70%);
+  animation: winner-glow 1.8s ease-in-out infinite;
+}
+
 @keyframes burst-ring {
   0% { transform: scale(0.2); opacity: 0.85; }
   100% { transform: scale(2.8); opacity: 0; }
