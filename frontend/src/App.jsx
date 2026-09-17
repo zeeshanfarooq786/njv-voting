@@ -128,6 +128,17 @@ function photoRejectReason(file) {
 }
 
 function PresentationShow({ board, onExit }) {
+  const [musicOn, setMusicOn] = useState(true)
+
+  useEffect(() => {
+    if (!musicOn) {
+      sounds.stopPresentationBed()
+      return undefined
+    }
+    sounds.unlock()
+    sounds.startPresentationBed()
+    return () => sounds.stopPresentationBed()
+  }, [musicOn])
   const posts = useMemo(() => {
     const people = board.candidates || []
     const fromOrder = orderedPositions(people.map((c) => c.position)).filter((p) =>
@@ -155,13 +166,22 @@ function PresentationShow({ board, onExit }) {
         <div className="min-w-0 flex-1">
           <BrandMark size={44} subtitle="Live count" />
         </div>
-        <button
-          onClick={onExit}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-[#0A3B65]/70 px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs"
-        >
-          <IconExit size={12} />
-          <span className="hidden sm:inline">Exit TV mode</span>
-        </button>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setMusicOn((on) => !on)}
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-[#0A3B65]/70 px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs"
+          >
+            {musicOn ? 'Mute music' : 'Play music'}
+          </button>
+          <button
+            onClick={onExit}
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-[#0A3B65]/70 px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs"
+          >
+            <IconExit size={12} />
+            <span className="hidden sm:inline">Exit TV mode</span>
+          </button>
+        </div>
       </div>
       <div style={{ perspective: 1400 }} className="flex min-h-0 flex-1 flex-col">
       <AnimatePresence mode="wait">
