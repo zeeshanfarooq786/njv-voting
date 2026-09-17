@@ -257,7 +257,18 @@ function PresentationShow({ board, onExit }) {
             <IconUser size={16} className="shrink-0 text-[#FFC72C]" />
             <span className="truncate">{prettyText(post)}</span>
           </p>
-          <div className="flex flex-wrap content-start justify-center gap-3">
+          <div
+            className="grid min-h-0 flex-1 content-center items-stretch justify-items-stretch gap-3 overflow-hidden"
+            style={{
+              gridTemplateColumns:
+                ended || nominees.length <= 1
+                  ? 'minmax(0, min(560px, 100%))'
+                  : nominees.length <= 4
+                    ? 'repeat(2, minmax(0, 1fr))'
+                    : 'repeat(3, minmax(0, 1fr))',
+              justifyContent: 'center',
+            }}
+          >
             {ended && !winner && (
               <p className="rounded-2xl border border-white/15 bg-[#0A3B65]/55 px-6 py-8 text-center text-white/70">
                 No votes were cast for this post.
@@ -265,20 +276,22 @@ function PresentationShow({ board, onExit }) {
             )}
             {nominees.map((c, i) => {
               const lead = !ended && nominees.every((o) => o.vote_count <= c.vote_count) && c.vote_count > 0
+              const pack = !ended && nominees.length > 1
+              const photo = ended ? 132 : nominees.length <= 2 ? 88 : nominees.length <= 4 ? 64 : 52
               return (
                 <motion.div
                   key={`${post}-${c.id}-${index}`}
                   initial={entrance.initial}
                   animate={entrance.animate}
                   transition={{ ...entrance.transition, delay: 0.08 * i }}
-                  className={`relative flex min-h-[132px] w-full min-w-0 items-center gap-5 rounded-3xl border px-5 py-4 sm:min-h-[180px] sm:w-[min(100%,520px)] lg:min-h-[200px] lg:w-[560px] ${
-                    ended || lead ? 'border-[#FFC72C] bg-white/10' : 'border-white/15 bg-[#0A3B65]/55'
-                  }`}
+                  className={`relative flex min-h-0 w-full min-w-0 items-center rounded-3xl border ${
+                    pack ? 'gap-3 px-3 py-3' : 'gap-5 px-5 py-4'
+                  } ${ended || lead ? 'border-[#FFC72C] bg-white/10' : 'border-white/15 bg-[#0A3B65]/55'}`}
                 >
                   {ended ? (
                     <span className="leading-badge absolute right-4 top-4 z-10">Elected</span>
                   ) : lead ? (
-                    <span className="leading-badge absolute right-4 top-4 z-10">Leading</span>
+                    <span className="leading-badge absolute right-3 top-3 z-10">Leading</span>
                   ) : null}
                   <div className="relative shrink-0">
                     {ended && (
@@ -288,13 +301,13 @@ function PresentationShow({ board, onExit }) {
                         className="pointer-events-none absolute -top-8 left-1/2 z-10 w-16 -translate-x-1/2 drop-shadow-[0_4px_12px_rgba(255,199,44,0.75)] sm:w-20"
                       />
                     )}
-                    <Avatar candidate={c} size={132} />
+                    <Avatar candidate={c} size={photo} />
                   </div>
-                  <div className="min-w-0 flex-1 pr-2">
-                    <p className="hall-name truncate text-white">{c.name}</p>
-                    <p className="mt-1 text-4xl font-semibold tabular-nums leading-none text-[#FFC72C] sm:text-5xl">{c.vote_count}</p>
+                  <div className={`min-w-0 flex-1 ${ended ? 'pr-2' : 'pr-16'}`}>
+                    <p className={`hall-name truncate text-white ${pack ? 'text-base sm:text-lg' : ''}`}>{c.name}</p>
+                    <p className={`mt-1 font-semibold tabular-nums leading-none text-[#FFC72C] ${pack ? 'text-2xl sm:text-3xl' : 'text-4xl sm:text-5xl'}`}>{c.vote_count}</p>
                     <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/50">votes</p>
-                    <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/10">
+                    <div className={`overflow-hidden rounded-full bg-white/10 ${pack ? 'mt-2 h-1.5' : 'mt-3 h-2.5'}`}>
                       <div
                         className="h-full rounded-full bg-[#FFC72C]"
                         style={{ width: `${Math.max(8, (c.vote_count / max) * 100)}%` }}
