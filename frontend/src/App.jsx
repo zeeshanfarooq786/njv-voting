@@ -512,7 +512,7 @@ function HandwrittenTitle({ text }) {
   }, [cycle, letters])
 
   return (
-    <p className="handwrite-title mb-5 max-w-3xl font-serif text-[15px] leading-snug text-[#FFC72C] sm:text-lg md:text-xl">
+    <p className="handwrite-title mb-5 max-w-3xl text-[15px] leading-snug text-[#FFC72C] sm:text-lg md:text-xl">
       {text.split('').map((ch, i) => (
         <motion.span
           key={`${cycle}-${i}`}
