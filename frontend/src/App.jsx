@@ -211,8 +211,8 @@ function PresentationShow({ board, onExit }) {
               style={{
                 left: `${18 + ((i * 37) % 64)}%`,
                 top: `${12 + ((i * 23) % 70)}%`,
-                width: 16 + (i % 5) * 4,
-                height: 16 + (i % 5) * 4,
+                width: 10 + (i % 5) * 2,
+                height: 10 + (i % 5) * 2,
                 animationDelay: `${(i % 8) * 0.12}s`,
               }}
             />
