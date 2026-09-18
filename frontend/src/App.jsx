@@ -240,7 +240,7 @@ function PresentationShow({ board, onExit }) {
       )}
       <div className="relative z-20 mb-3 flex shrink-0 items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <BrandMark size={72} subtitle={ended ? 'The winners' : 'Live hall'} />
+          <BrandMark size={ended ? 52 : 72} subtitle={ended ? 'The winners' : 'Live hall'} />
           <HandwrittenTitle text="NJV Government School Student Council Election 2026" />
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
@@ -265,19 +265,19 @@ function PresentationShow({ board, onExit }) {
         <motion.div
           key={post}
           className="flex min-h-0 flex-1 flex-col"
-          initial={{ rotateY: 88, opacity: 0, scale: 0.92 }}
-          animate={{ rotateY: 0, opacity: 1, scale: 1 }}
-          exit={{ rotateY: -88, opacity: 0, scale: 0.92 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          style={{ transformOrigin: 'center', backfaceVisibility: 'hidden' }}
+          initial={ended ? { opacity: 0, y: 12 } : { rotateY: 88, opacity: 0, scale: 0.92 }}
+          animate={ended ? { opacity: 1, y: 0 } : { rotateY: 0, opacity: 1, scale: 1 }}
+          exit={ended ? { opacity: 0, y: -12 } : { rotateY: -88, opacity: 0, scale: 0.92 }}
+          transition={{ duration: ended ? 0.4 : 0.7, ease: [0.22, 1, 0.36, 1] }}
+          style={ended ? undefined : { transformOrigin: 'center', backfaceVisibility: 'hidden' }}
         >
           <p className="truncate text-[10px] font-medium tracking-[0.18em] text-[#FFC72C] uppercase sm:text-xs">{cat}</p>
-          <p className="mb-3 flex items-center gap-2 text-sm font-medium text-white sm:mb-4 sm:text-base">
+          <p className={`flex items-center gap-2 text-sm font-medium text-white sm:text-base ${ended ? 'mb-2' : 'mb-3 sm:mb-4'}`}>
             <IconUser size={16} className="shrink-0 text-[#FFC72C]" />
             <span className="truncate">{prettyText(post)}</span>
           </p>
           {ended ? (
-            <div className="flex min-h-0 flex-1 flex-col items-center justify-start overflow-visible pt-8">
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden pt-6">
               {!winner ? (
                 <p className="rounded-2xl border border-white/15 bg-[#0A3B65]/55 px-6 py-8 text-center text-white/70">
                   No votes were cast for this post.
@@ -285,24 +285,24 @@ function PresentationShow({ board, onExit }) {
               ) : (
                 <motion.div
                   key={`${post}-${winner.id}-${index}`}
-                  initial={entrance.initial}
-                  animate={entrance.animate}
-                  transition={entrance.transition}
-                  className="relative flex w-full max-w-xl flex-col items-center rounded-[2rem] border border-[#FFC72C] bg-gradient-to-b from-[#FFC72C]/20 via-[#0A3B65]/70 to-[#0A3B65]/90 px-8 pb-8 pt-16 text-center shadow-[0_0_80px_rgba(255,199,44,0.28)]"
+                  initial={{ opacity: 0, scale: 0.92, y: 16 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.45 }}
+                  className="relative flex max-h-full w-full max-w-lg flex-col items-center rounded-[1.75rem] border border-[#FFC72C] bg-gradient-to-b from-[#FFC72C]/20 via-[#0A3B65]/70 to-[#0A3B65]/90 px-6 pb-5 pt-12 text-center shadow-[0_0_60px_rgba(255,199,44,0.28)]"
                 >
                   <img
                     src={crown}
                     alt=""
-                    className="pointer-events-none absolute -top-10 left-1/2 z-10 w-24 -translate-x-1/2 drop-shadow-[0_8px_24px_rgba(255,199,44,0.85)] sm:w-28"
+                    className="pointer-events-none absolute -top-7 left-1/2 z-10 w-16 -translate-x-1/2 drop-shadow-[0_8px_24px_rgba(255,199,44,0.85)] sm:w-20"
                   />
-                  <span className="leading-badge mb-4">Elected</span>
-                  <div className="rounded-full p-1.5 ring-4 ring-[#FFC72C] ring-offset-4 ring-offset-[#0A3B65] shadow-[0_0_40px_rgba(255,199,44,0.45)]">
-                    <Avatar candidate={winner} size={200} />
+                  <span className="leading-badge mb-3">Elected</span>
+                  <div className="rounded-full p-1 ring-4 ring-[#FFC72C] ring-offset-2 ring-offset-[#0A3B65] shadow-[0_0_32px_rgba(255,199,44,0.45)]">
+                    <Avatar candidate={winner} size={140} />
                   </div>
-                  <p className="hall-name mt-6 max-w-full px-2 text-white" style={{ whiteSpace: 'normal', fontSize: 'clamp(1.6rem, 3.4vw, 2.4rem)' }}>
+                  <p className="hall-name mt-4 max-w-full px-2 text-white" style={{ whiteSpace: 'normal', fontSize: 'clamp(1.35rem, 2.6vw, 2rem)' }}>
                     {winner.name}
                   </p>
-                  <p className="mt-3 text-6xl font-semibold tabular-nums leading-none text-[#FFC72C] sm:text-7xl">{winner.vote_count}</p>
+                  <p className="mt-2 text-5xl font-semibold tabular-nums leading-none text-[#FFC72C]">{winner.vote_count}</p>
                   <p className="mt-2 text-xs font-semibold uppercase tracking-[0.28em] text-white/55">votes</p>
                 </motion.div>
               )}
