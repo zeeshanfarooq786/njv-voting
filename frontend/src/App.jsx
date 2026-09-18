@@ -276,11 +276,43 @@ function PresentationShow({ board, onExit }) {
             <IconUser size={16} className="shrink-0 text-[#FFC72C]" />
             <span className="truncate">{prettyText(post)}</span>
           </p>
+          {ended ? (
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-start overflow-visible pt-8">
+              {!winner ? (
+                <p className="rounded-2xl border border-white/15 bg-[#0A3B65]/55 px-6 py-8 text-center text-white/70">
+                  No votes were cast for this post.
+                </p>
+              ) : (
+                <motion.div
+                  key={`${post}-${winner.id}-${index}`}
+                  initial={entrance.initial}
+                  animate={entrance.animate}
+                  transition={entrance.transition}
+                  className="relative flex w-full max-w-xl flex-col items-center rounded-[2rem] border border-[#FFC72C] bg-gradient-to-b from-[#FFC72C]/20 via-[#0A3B65]/70 to-[#0A3B65]/90 px-8 pb-8 pt-16 text-center shadow-[0_0_80px_rgba(255,199,44,0.28)]"
+                >
+                  <img
+                    src={crown}
+                    alt=""
+                    className="pointer-events-none absolute -top-10 left-1/2 z-10 w-24 -translate-x-1/2 drop-shadow-[0_8px_24px_rgba(255,199,44,0.85)] sm:w-28"
+                  />
+                  <span className="leading-badge mb-4">Elected</span>
+                  <div className="rounded-full p-1.5 ring-4 ring-[#FFC72C] ring-offset-4 ring-offset-[#0A3B65] shadow-[0_0_40px_rgba(255,199,44,0.45)]">
+                    <Avatar candidate={winner} size={200} />
+                  </div>
+                  <p className="hall-name mt-6 max-w-full px-2 text-white" style={{ whiteSpace: 'normal', fontSize: 'clamp(1.6rem, 3.4vw, 2.4rem)' }}>
+                    {winner.name}
+                  </p>
+                  <p className="mt-3 text-6xl font-semibold tabular-nums leading-none text-[#FFC72C] sm:text-7xl">{winner.vote_count}</p>
+                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.28em] text-white/55">votes</p>
+                </motion.div>
+              )}
+            </div>
+          ) : (
           <div
-            className={`grid min-h-0 flex-1 content-start items-stretch justify-items-stretch gap-3 overflow-visible ${ended ? 'pt-10' : 'pt-2'}`}
+            className="grid min-h-0 flex-1 content-start items-stretch justify-items-stretch gap-3 overflow-visible pt-2"
             style={{
               gridTemplateColumns:
-                ended || nominees.length <= 1
+                nominees.length <= 1
                   ? 'minmax(0, min(560px, 100%))'
                   : nominees.length <= 4
                     ? 'repeat(2, minmax(0, 1fr))'
@@ -288,15 +320,10 @@ function PresentationShow({ board, onExit }) {
               justifyContent: 'center',
             }}
           >
-            {ended && !winner && (
-              <p className="rounded-2xl border border-white/15 bg-[#0A3B65]/55 px-6 py-8 text-center text-white/70">
-                No votes were cast for this post.
-              </p>
-            )}
             {nominees.map((c, i) => {
-              const lead = !ended && nominees.every((o) => o.vote_count <= c.vote_count) && c.vote_count > 0
-              const pack = !ended && nominees.length > 1
-              const photo = ended ? 132 : nominees.length <= 2 ? 88 : nominees.length <= 4 ? 64 : 52
+              const lead = nominees.every((o) => o.vote_count <= c.vote_count) && c.vote_count > 0
+              const pack = nominees.length > 1
+              const photo = nominees.length <= 2 ? 88 : nominees.length <= 4 ? 64 : 52
               return (
                 <motion.div
                   key={`${post}-${c.id}-${index}`}
@@ -305,24 +332,15 @@ function PresentationShow({ board, onExit }) {
                   transition={{ ...entrance.transition, delay: 0.08 * i }}
                   className={`relative flex min-h-0 w-full min-w-0 items-center rounded-3xl border ${
                     pack ? 'gap-3 px-3 py-3' : 'gap-5 px-5 py-4'
-                  } ${ended || lead ? 'border-[#FFC72C] bg-white/10' : 'border-white/15 bg-[#0A3B65]/55'}`}
+                  } ${lead ? 'border-[#FFC72C] bg-white/10' : 'border-white/15 bg-[#0A3B65]/55'}`}
                 >
-                  {ended ? (
-                    <span className="leading-badge absolute right-4 top-4 z-10">Elected</span>
-                  ) : lead ? (
+                  {lead ? (
                     <span className="leading-badge absolute right-3 top-3 z-10">Leading</span>
                   ) : null}
                   <div className="relative shrink-0">
-                    {ended && (
-                      <img
-                        src={crown}
-                        alt=""
-                        className="pointer-events-none absolute -top-8 left-1/2 z-10 w-16 -translate-x-1/2 drop-shadow-[0_4px_12px_rgba(255,199,44,0.75)] sm:w-20"
-                      />
-                    )}
                     <Avatar candidate={c} size={photo} />
                   </div>
-                  <div className={`min-w-0 flex-1 ${ended ? 'pr-2' : 'pr-16'}`}>
+                  <div className="min-w-0 flex-1 pr-16">
                     <p className={`hall-name truncate text-white ${pack ? 'text-base sm:text-lg' : ''}`}>{c.name}</p>
                     <p className={`mt-1 font-semibold tabular-nums leading-none text-[#FFC72C] ${pack ? 'text-2xl sm:text-3xl' : 'text-4xl sm:text-5xl'}`}>{c.vote_count}</p>
                     <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/50">votes</p>
@@ -337,6 +355,7 @@ function PresentationShow({ board, onExit }) {
               )
             })}
           </div>
+          )}
         </motion.div>
       </AnimatePresence>
       </div>
