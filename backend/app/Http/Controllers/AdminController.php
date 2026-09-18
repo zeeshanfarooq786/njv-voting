@@ -395,23 +395,32 @@ class AdminController extends Controller
             ]);
         }
 
-        imagealphablending($image, false);
-        imagesavealpha($image, true);
+        imagealphablending($image, true);
+        imagesavealpha($image, false);
+
+        $max = 800;
+        $width = imagesx($image);
+        $height = imagesy($image);
+        if ($width > $max || $height > $max) {
+            $scale = $max / max($width, $height);
+            $nw = max(1, (int) round($width * $scale));
+            $nh = max(1, (int) round($height * $scale));
+            $resized = imagecreatetruecolor($nw, $nh);
+            $fill = imagecolorallocate($resized, 10, 59, 101);
+            imagefilledrectangle($resized, 0, 0, $nw, $nh, $fill);
+            imagecopyresampled($resized, $image, 0, 0, 0, 0, $nw, $nh, $width, $height);
+            imagedestroy($image);
+            $image = $resized;
+        }
 
         $dir = public_path('uploads/candidates');
         if (!is_dir($dir)) {
             mkdir($dir, 0755, true);
         }
 
-        $name = bin2hex(random_bytes(16)).'.'.$allowed[$type];
+        $name = bin2hex(random_bytes(16)).'.jpg';
         $target = $dir.DIRECTORY_SEPARATOR.$name;
-
-        $saved = match ($type) {
-            'image/jpeg' => imagejpeg($image, $target, 88),
-            'image/png' => imagepng($image, $target, 6),
-            'image/webp' => imagewebp($image, $target, 88),
-            default => false,
-        };
+        $saved = imagejpeg($image, $target, 80);
 
         imagedestroy($image);
 

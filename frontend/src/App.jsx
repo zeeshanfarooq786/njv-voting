@@ -856,6 +856,16 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
   const [confirmReviewed, setConfirmReviewed] = useState(false)
 
   useEffect(() => {
+    for (const c of data?.candidates || []) {
+      const src = photoSrc(c.photo_url)
+      if (src && !src.startsWith('data:')) {
+        const img = new Image()
+        img.src = src
+      }
+    }
+  }, [data?.candidates])
+
+  useEffect(() => {
     let live = true
     if (session.ready) {
       session.ready
@@ -1170,7 +1180,14 @@ function Avatar({ candidate, size = 64, showMissing = false }) {
         }}
       >
         {src ? (
-          <img src={src} alt={candidate.name} className="h-full w-full object-cover" />
+          <img
+            src={src}
+            alt={candidate.name}
+            className="h-full w-full object-cover"
+            decoding="async"
+            loading={size >= 64 ? 'eager' : 'lazy'}
+            fetchPriority={size >= 64 ? 'high' : 'low'}
+          />
         ) : (
           <span className="text-center text-[10px] font-semibold leading-tight tracking-wide uppercase">
             {showMissing ? 'No photo' : initials(candidate.name)}
