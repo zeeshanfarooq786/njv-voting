@@ -1,7 +1,6 @@
 <?php
 
-use App\Models\Candidate;
-use App\Support\Election;
+use App\Support\DummyBallot;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -30,46 +29,7 @@ return new class extends Migration
         DB::table('voting_sessions')->delete();
         DB::table('candidates')->delete();
 
-        $palette = ['#0d7a3e', '#1d4ed8', '#b45309', '#7c3aed', '#be123c', '#0f766e', '#c2410c', '#4338ca'];
-        $boys = ['Ahmed Khan', 'Bilal Hussain', 'Hassan Ali'];
-        $girls = ['Ayesha Siddiqui', 'Zara Malik', 'Fatima Noor'];
-        $now = now();
-        $i = 0;
-
-        foreach (Election::POSTS as $post) {
-            if (Election::isClassRep($post)) {
-                $names = str_contains($post, 'Female') ? $girls : $boys;
-                foreach (Election::GRADES as $grade) {
-                    foreach ($names as $n => $name) {
-                        Candidate::query()->create([
-                            'name' => $name.' '.$grade,
-                            'position' => $post,
-                            'grade' => $grade,
-                            'color_tag' => $palette[$i++ % count($palette)],
-                            'vote_count' => 0,
-                            'is_active' => true,
-                            'created_at' => $now,
-                            'updated_at' => $now,
-                        ]);
-                    }
-                }
-                continue;
-            }
-
-            $names = str_contains($post, 'Female') ? $girls : $boys;
-            foreach ($names as $name) {
-                Candidate::query()->create([
-                    'name' => $name,
-                    'position' => $post,
-                    'grade' => null,
-                    'color_tag' => $palette[$i++ % count($palette)],
-                    'vote_count' => 0,
-                    'is_active' => true,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ]);
-            }
-        }
+        DummyBallot::seed();
     }
 
     public function down(): void
