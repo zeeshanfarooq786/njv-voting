@@ -1370,7 +1370,7 @@ function Confirm({ result, onDone }) {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 1 }}
         >
-          {result?.candidate_name ? `Recorded for ${result.candidate_name}` : 'Your vote has been sealed.'}
+          Your vote has been sealed.
         </motion.p>
 
         <motion.div
