@@ -6,6 +6,7 @@ use App\Models\Candidate;
 use App\Models\Setting;
 use App\Models\Vote;
 use App\Models\VotingSession;
+use App\Support\Election;
 use App\Support\StudentEmail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,6 +24,7 @@ class SessionController extends Controller
 
         $data = $request->validate([
             'student_email' => ['required', 'string', 'max:255'],
+            'student_grade' => ['required', 'string', 'in:'.implode(',', Election::GRADES)],
         ]);
 
         $email = StudentEmail::normalize($data['student_email']);
@@ -41,7 +43,9 @@ class SessionController extends Controller
 
         $teacher = $request->user();
 
-        $session = DB::transaction(function () use ($teacher, $email) {
+        $grade = strtoupper($data['student_grade']);
+
+        $session = DB::transaction(function () use ($teacher, $email, $grade) {
             VotingSession::query()
                 ->where('teacher_id', $teacher->id)
                 ->where('status', VotingSession::STATUS_ACTIVE)
@@ -51,6 +55,7 @@ class SessionController extends Controller
             return VotingSession::query()->create([
                 'teacher_id' => $teacher->id,
                 'student_email' => $email,
+                'student_grade' => $grade,
                 'token' => VotingSession::generateToken(),
                 'started_at' => now(),
                 'expires_at' => now()->addMinutes(VotingSession::IDLE_MINUTES),
@@ -58,24 +63,24 @@ class SessionController extends Controller
             ]);
         });
 
-        $candidates = Candidate::query()
-            ->where('is_active', true)
-            ->orderBy('position')
-            ->orderBy('name')
-            ->get()
-            ->map(fn (Candidate $candidate) => [
-                'id' => $candidate->id,
-                'name' => $candidate->name,
-                'position' => $candidate->position,
-                'photo_url' => $candidate->photoUrl(),
-                'color_tag' => $candidate->color_tag,
-                'vote_count' => $candidate->vote_count,
-                'has_photo' => filled($candidate->photo_path),
-            ]);
+        $candidates = Election::ballot(
+            Candidate::query()->orderBy('position')->orderBy('name')->get(),
+            $grade,
+        )->map(fn (Candidate $candidate) => [
+            'id' => $candidate->id,
+            'name' => $candidate->name,
+            'position' => $candidate->position,
+            'grade' => $candidate->grade,
+            'photo_url' => $candidate->photoUrl(),
+            'color_tag' => $candidate->color_tag,
+            'vote_count' => $candidate->vote_count,
+            'has_photo' => filled($candidate->photo_path),
+        ]);
 
         return response()->json([
             'session_token' => $session->token,
             'student_email' => $session->student_email,
+            'student_grade' => $session->student_grade,
             'expires_at' => $session->expires_at->toIso8601String(),
             'election_title' => Setting::electionTitle(),
             'candidates' => $candidates,

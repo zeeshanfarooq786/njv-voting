@@ -17,6 +17,7 @@ class VotingSession extends Model
     protected $fillable = [
         'teacher_id',
         'student_email',
+        'student_grade',
         'token',
         'started_at',
         'ended_at',

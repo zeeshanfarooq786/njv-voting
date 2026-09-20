@@ -24,7 +24,7 @@ import {
 import AmbientField, { Confetti, RippleLayer, spawnRipple } from './Particles'
 import { cardIn, fadeUp, letter } from './motion'
 import { sounds } from './sounds'
-import { ALL_POSTS, ELECTION_CATEGORIES, categoryForPost, orderedPositions } from './positions'
+import { ALL_POSTS, ELECTION_CATEGORIES, GRADES, categoryForPost, forLabel, hallKeys, isClassRep, orderedPositions, parseHallKey } from './positions'
 
 const TITLE = 'NJV KARACHI'
 const DOMAIN = 'njv.edu.pk'
@@ -193,14 +193,7 @@ function PresentationShow({ board, onExit }) {
     sounds.startPresentationBed()
     return () => sounds.stopPresentationBed()
   }, [musicOn])
-  const posts = useMemo(() => {
-    const people = board.candidates || []
-    const fromOrder = orderedPositions(people.map((c) => c.position)).filter((p) =>
-      people.some((c) => c.position === p),
-    )
-    const extra = [...new Set(people.map((c) => c.position).filter((p) => p && !fromOrder.includes(p)))]
-    return [...fromOrder, ...extra]
-  }, [board.candidates])
+  const posts = useMemo(() => hallKeys(board.candidates || []), [board.candidates])
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
@@ -209,8 +202,11 @@ function PresentationShow({ board, onExit }) {
     return () => clearInterval(t)
   }, [posts.length])
 
-  const post = posts[index] || posts[0] || ''
-  const field = (board.candidates || []).filter((c) => c.position === post)
+  const postKey = posts[index] || posts[0] || ''
+  const { position: post, grade: postGrade } = parseHallKey(postKey)
+  const field = (board.candidates || []).filter(
+    (c) => c.position === post && (!postGrade || c.grade === postGrade),
+  )
   const ranked = [...field].sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0))
   const winner = ranked[0] && (ranked[0].vote_count || 0) > 0 ? ranked[0] : null
   const nominees = ended ? (winner ? [winner] : []) : field
@@ -219,7 +215,7 @@ function PresentationShow({ board, onExit }) {
   const entrance = TV_ENTRANCES[index % TV_ENTRANCES.length]
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col overflow-hidden px-4 py-4 sm:px-8 sm:py-6">
+    <div className={`relative flex h-full min-h-0 flex-col overflow-hidden px-4 sm:px-8 ${ended ? 'py-2' : 'py-4 sm:py-6'}`}>
       {ended && winner && (
         <>
           <Confetti key={`hall-confetti-${index}`} show />
@@ -238,10 +234,10 @@ function PresentationShow({ board, onExit }) {
           ))}
         </>
       )}
-      <div className="relative z-20 mb-3 flex shrink-0 items-start justify-between gap-2">
+      <div className={`relative z-20 flex shrink-0 items-start justify-between gap-2 ${ended ? 'mb-1' : 'mb-3'}`}>
         <div className="min-w-0 flex-1">
-          <BrandMark size={ended ? 52 : 72} subtitle={ended ? 'The winners' : 'Live hall'} />
-          <HandwrittenTitle text="NJV Government School Student Council Election 2026" />
+          <BrandMark size={ended ? 44 : 72} subtitle={ended ? 'The winners' : 'Live hall'} />
+          {!ended && <HandwrittenTitle text="NJV Government School Student Council Election 2026" />}
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           <button
@@ -263,7 +259,7 @@ function PresentationShow({ board, onExit }) {
       <div style={{ perspective: 1400 }} className="relative z-10 flex min-h-0 flex-1 flex-col overflow-visible">
       <AnimatePresence mode="wait">
         <motion.div
-          key={post}
+          key={postKey}
           className="flex min-h-0 flex-1 flex-col"
           initial={ended ? { opacity: 0, y: 12 } : { rotateY: 88, opacity: 0, scale: 0.92 }}
           animate={ended ? { opacity: 1, y: 0 } : { rotateY: 0, opacity: 1, scale: 1 }}
@@ -274,10 +270,10 @@ function PresentationShow({ board, onExit }) {
           <p className="truncate text-[10px] font-medium tracking-[0.18em] text-[#FFC72C] uppercase sm:text-xs">{cat}</p>
           <p className={`flex items-center gap-2 text-sm font-medium text-white sm:text-base ${ended ? 'mb-2' : 'mb-3 sm:mb-4'}`}>
             <IconUser size={16} className="shrink-0 text-[#FFC72C]" />
-            <span className="truncate">{prettyText(post)}</span>
+            <span className="truncate">{forLabel(post)}{postGrade ? ` · Grade ${postGrade}` : ''}</span>
           </p>
           {ended ? (
-            <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden pt-6">
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden pt-2">
               {!winner ? (
                 <p className="rounded-2xl border border-white/15 bg-[#0A3B65]/55 px-6 py-8 text-center text-white/70">
                   No votes were cast for this post.
@@ -288,7 +284,7 @@ function PresentationShow({ board, onExit }) {
                   initial={{ opacity: 0, scale: 0.92, y: 16 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   transition={{ duration: 0.45 }}
-                  className="relative flex max-h-full w-full max-w-lg flex-col items-center rounded-[1.75rem] border border-[#FFC72C] bg-gradient-to-b from-[#FFC72C]/20 via-[#0A3B65]/70 to-[#0A3B65]/90 px-6 pb-5 pt-12 text-center shadow-[0_0_60px_rgba(255,199,44,0.28)]"
+                  className="relative flex max-h-full w-full max-w-md flex-col items-center rounded-[1.5rem] border border-[#FFC72C] bg-gradient-to-b from-[#FFC72C]/20 via-[#0A3B65]/70 to-[#0A3B65]/90 px-5 pb-3 pt-9 text-center shadow-[0_0_60px_rgba(255,199,44,0.28)]"
                 >
                   <img
                     src={crown}
@@ -297,12 +293,12 @@ function PresentationShow({ board, onExit }) {
                   />
                   <span className="leading-badge mb-3">Elected</span>
                   <div className="rounded-full p-1 ring-4 ring-[#FFC72C] ring-offset-2 ring-offset-[#0A3B65] shadow-[0_0_32px_rgba(255,199,44,0.45)]">
-                    <Avatar candidate={winner} size={140} />
+                    <Avatar candidate={winner} size={88} />
                   </div>
                   <p className="hall-name mt-4 max-w-full px-2 text-white" style={{ whiteSpace: 'normal', fontSize: 'clamp(1.35rem, 2.6vw, 2rem)' }}>
                     {winner.name}
                   </p>
-                  <p className="mt-2 text-5xl font-semibold tabular-nums leading-none text-[#FFC72C]">{winner.vote_count}</p>
+                  <p className="mt-1 text-4xl font-semibold tabular-nums leading-none text-[#FFC72C]">{winner.vote_count}</p>
                   <p className="mt-2 text-xs font-semibold uppercase tracking-[0.28em] text-white/55">votes</p>
                 </motion.div>
               )}
@@ -743,6 +739,7 @@ function Login({ mode, setMode, onSuccess }) {
 
 function TeacherStation({ user, onLogout, onSession, onRipple }) {
   const [email, setEmail] = useState('')
+  const [grade, setGrade] = useState('IX')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -756,9 +753,13 @@ function TeacherStation({ user, onLogout, onSession, onRipple }) {
       setError(`Use a valid school email, like ahmed.001@${DOMAIN}`)
       return
     }
+    if (!GRADES.includes(grade)) {
+      setError('Select the student grade.')
+      return
+    }
     setBusy(true)
     try {
-      onSession(await api.startSession(trimmed))
+      onSession(await api.startSession(trimmed, grade))
     } catch (err) {
       setError(friendlyError(err))
     } finally {
@@ -787,7 +788,7 @@ function TeacherStation({ user, onLogout, onSession, onRipple }) {
       <form onSubmit={start} className="glass rounded-3xl p-8">
         <p className="mb-4 flex items-center gap-2 text-sm text-secondary">
           <IconMail size={15} className="text-[#FFC72C]" />
-          One student. One voice. Enter your school email and choose your council.
+          One student. One voice. Enter school email and grade, then choose the council.
         </p>
         <input
           className="w-full rounded-2xl border border-white/10 bg-[#0A3B65]/50 px-5 py-4 text-xl outline-none focus:border-[#FFC72C]"
@@ -796,6 +797,20 @@ function TeacherStation({ user, onLogout, onSession, onRipple }) {
           onChange={(e) => setEmail(e.target.value)}
           autoFocus
         />
+        <label className="mt-4 block text-xs font-semibold uppercase tracking-[0.18em] text-[#FFC72C]">
+          Student grade
+          <select
+            className="mt-2 w-full rounded-2xl border border-white/10 bg-[#0A3B65]/50 px-5 py-4 text-lg text-white outline-none focus:border-[#FFC72C]"
+            value={grade}
+            onChange={(e) => setGrade(e.target.value)}
+          >
+            {GRADES.map((g) => (
+              <option key={g} value={g}>
+                Grade {g}
+              </option>
+            ))}
+          </select>
+        </label>
         {error && <p className="mt-3 text-rose-300">{error}</p>}
         <button
           disabled={busy}
@@ -1009,7 +1024,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                       <div key={position} className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#0A3B65]/45 px-3 py-2">
                         {c ? <Avatar candidate={c} size={56} /> : null}
                         <div className="min-w-0 flex-1">
-                          <p className="text-[11px] text-[#FFC72C]">{prettyText(position)}</p>
+                          <p className="text-[11px] text-[#FFC72C]">{forLabel(position)}</p>
                           <p className="truncate text-sm font-medium text-white">{c?.name || 'Not selected'}</p>
                         </div>
                         <button
@@ -1044,7 +1059,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                 <div className="mb-3 flex shrink-0 items-end justify-between gap-3">
                   <h2 className="flex items-center gap-2 text-xl font-medium text-white">
                     <IconUser size={20} className="text-[#FFC72C]" />
-                    {prettyText(currentPost)}
+                    {forLabel(currentPost)}
                   </h2>
                   <p className="flex items-center gap-1 text-[11px] text-white/45">
                     <IconClock size={13} />
@@ -1090,7 +1105,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                           <Avatar candidate={c} size={photo} />
                           <div className="min-w-0 flex-1">
                             <p className={`truncate font-semibold text-white ${pack ? 'text-base' : 'text-lg'}`}>{c.name}</p>
-                            <p className="text-xs font-semibold text-secondary">{prettyText(c.position)}</p>
+                            <p className="text-xs font-semibold text-secondary">{forLabel(c.position)}</p>
                           </div>
                           <motion.span
                             className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-bold ${
@@ -2171,6 +2186,7 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
   const [tab, setTab] = useState('ballot')
   const [name, setName] = useState('')
   const [position, setPosition] = useState(ALL_POSTS[0])
+  const [grade, setGrade] = useState('IX')
   const [photo, setPhoto] = useState(null)
   const [preview, setPreview] = useState('')
   const [eligible, setEligible] = useState(results.eligible_students ?? 0)
@@ -2340,11 +2356,13 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
       const form = new FormData()
       form.append('name', name)
       form.append('position', position)
+      if (isClassRep(position)) form.append('grade', grade)
       if (photo) form.append('photo', photo)
       const local = {
         id: `tmp-${Date.now()}`,
         name,
         position,
+        grade: isClassRep(position) ? grade : null,
         photo_url: preview || null,
         vote_count: 0,
         color_tag: '#FFC72C',
@@ -2514,7 +2532,7 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
                     </label>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-white">{c.name}</p>
-                      <p className="text-xs text-secondary">{prettyText(c.position)} · {c.vote_count} votes</p>
+                      <p className="text-xs text-secondary">{forLabel(c.position)}{c.grade ? ` · Grade ${c.grade}` : ''} · {c.vote_count} votes</p>
                       {!c.photo_url && <span className="no-photo-badge mt-1">No photo</span>}
                     </div>
                     <div className="flex flex-col gap-1">
@@ -2544,6 +2562,17 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
                 </optgroup>
               ))}
             </select>
+            {isClassRep(position) && (
+              <select
+                className="w-full rounded-lg bg-[#0A3B65]/80 px-3 py-2 text-white"
+                value={grade}
+                onChange={(e) => setGrade(e.target.value)}
+              >
+                {GRADES.map((g) => (
+                  <option key={g} value={g}>Grade {g}</option>
+                ))}
+              </select>
+            )}
             <label
               className={`photo-drop ${preview ? 'filled' : ''}`}
               onDragOver={(e) => e.preventDefault()}

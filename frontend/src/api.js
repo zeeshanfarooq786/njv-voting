@@ -145,7 +145,8 @@ export const api = {
     return Promise.resolve({ ok: true })
   },
   me: (role) => request(role === 'admin' ? '/admin/me' : '/teacher/me'),
-  startSession: (student_email) => request('/session/start', { method: 'POST', json: { student_email } }),
+  startSession: (student_email, student_grade) =>
+    request('/session/start', { method: 'POST', json: { student_email, student_grade } }),
   endSession: (session_token) => request('/session/end', { method: 'POST', json: { session_token } }),
   ballot: () => request('/ballot'),
   candidates: (session_token) => request(`/candidates?session_token=${encodeURIComponent(session_token || '')}`),

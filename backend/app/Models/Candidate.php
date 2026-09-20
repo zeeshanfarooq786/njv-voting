@@ -10,6 +10,7 @@ class Candidate extends Model
     protected $fillable = [
         'name',
         'position',
+        'grade',
         'photo_path',
         'vote_count',
         'color_tag',

@@ -7,6 +7,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Models\Vote;
 use App\Models\VoteEvent;
+use App\Support\Election;
 use App\Support\StudentEmail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,6 +27,7 @@ class AdminController extends Controller
                 'id' => $candidate->id,
                 'name' => $candidate->name,
                 'position' => $candidate->position,
+                'grade' => $candidate->grade,
                 'photo_url' => $candidate->photoUrl(),
                 'vote_count' => $candidate->vote_count,
                 'color_tag' => $candidate->color_tag,
@@ -98,7 +100,8 @@ class AdminController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
-            'position' => ['required', 'string', 'max:120'],
+            'position' => ['required', 'string', Rule::in(Election::POSTS)],
+            'grade' => ['nullable', 'string', Rule::in(Election::GRADES)],
             'color_tag' => ['nullable', 'string', 'max:20', 'regex:/^#[0-9a-fA-F]{3,8}$/'],
             'photo' => ['nullable', 'file', 'mimetypes:image/jpeg,image/png,image/webp', 'max:2048'],
         ]);
@@ -108,9 +111,16 @@ class AdminController extends Controller
             $photoPath = $this->storePublicPhoto($request->file('photo'));
         }
 
+        if (Election::isClassRep($data['position']) && empty($data['grade'])) {
+            throw ValidationException::withMessages([
+                'grade' => 'Choose the candidate grade for class representatives.',
+            ]);
+        }
+
         $candidate = Candidate::query()->create([
             'name' => $data['name'],
             'position' => $data['position'],
+            'grade' => Election::isClassRep($data['position']) ? ($data['grade'] ?? null) : null,
             'color_tag' => $data['color_tag'] ?? $this->nextColor(),
             'photo_path' => $photoPath,
             'vote_count' => 0,
@@ -126,7 +136,8 @@ class AdminController extends Controller
     {
         $data = $request->validate([
             'name' => ['sometimes', 'required', 'string', 'max:120'],
-            'position' => ['sometimes', 'required', 'string', 'max:120'],
+            'position' => ['sometimes', 'required', 'string', Rule::in(Election::POSTS)],
+            'grade' => ['nullable', 'string', Rule::in(Election::GRADES)],
             'color_tag' => ['nullable', 'string', 'max:20', 'regex:/^#[0-9a-fA-F]{3,8}$/'],
             'is_active' => ['sometimes', 'boolean'],
             'photo' => ['nullable', 'file', 'mimetypes:image/jpeg,image/png,image/webp', 'max:2048'],
@@ -441,6 +452,7 @@ class AdminController extends Controller
             'id' => $candidate->id,
             'name' => $candidate->name,
             'position' => $candidate->position,
+            'grade' => $candidate->grade,
             'photo_url' => $candidate->photoUrl(),
             'vote_count' => $candidate->vote_count,
             'color_tag' => $candidate->color_tag,

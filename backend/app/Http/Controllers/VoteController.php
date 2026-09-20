@@ -7,6 +7,7 @@ use App\Models\Setting;
 use App\Models\Vote;
 use App\Models\VoteEvent;
 use App\Models\VotingSession;
+use App\Support\Election;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,24 +25,24 @@ class VoteController extends Controller
             ], 403);
         }
 
-        $candidates = Candidate::query()
-            ->where('is_active', true)
-            ->orderBy('position')
-            ->orderBy('name')
-            ->get()
-            ->map(fn (Candidate $candidate) => [
-                'id' => $candidate->id,
-                'name' => $candidate->name,
-                'position' => $candidate->position,
-                'photo_url' => $candidate->photoUrl(),
-                'color_tag' => $candidate->color_tag,
-                'vote_count' => $candidate->vote_count,
-                'has_photo' => filled($candidate->photo_path),
-            ]);
+        $candidates = Election::ballot(
+            Candidate::query()->orderBy('position')->orderBy('name')->get(),
+            $session->student_grade,
+        )->map(fn (Candidate $candidate) => [
+            'id' => $candidate->id,
+            'name' => $candidate->name,
+            'position' => $candidate->position,
+            'grade' => $candidate->grade,
+            'photo_url' => $candidate->photoUrl(),
+            'color_tag' => $candidate->color_tag,
+            'vote_count' => $candidate->vote_count,
+            'has_photo' => filled($candidate->photo_path),
+        ]);
 
         return response()->json([
             'election_title' => Setting::electionTitle(),
             'student_email' => $session->student_email,
+            'student_grade' => $session->student_grade,
             'expires_at' => $session->expires_at->toIso8601String(),
             'candidates' => $candidates,
         ]);
@@ -102,6 +103,10 @@ class VoteController extends Controller
 
                     if (!$candidate) {
                         abort(404, 'Candidate not found.');
+                    }
+
+                    if (!Election::visibleForGrade($candidate, $session->student_grade)) {
+                        abort(422, 'This student can only vote for class representatives of their own grade.');
                     }
 
                     Vote::query()->create([
