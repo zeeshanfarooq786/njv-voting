@@ -649,13 +649,13 @@ function WaitOverlay({ show, title = 'Please wait', hint = 'Just a moment' }) {
 }
 
 function Login({ mode, setMode, onSuccess }) {
-  const [email, setEmail] = useState(mode === 'admin' ? `admin@${DOMAIN}` : `teacher@${DOMAIN}`)
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
-    setEmail(mode === 'admin' ? `admin@${DOMAIN}` : `teacher@${DOMAIN}`)
+    setEmail('')
     setPassword('')
     setError('')
   }, [mode])
@@ -704,14 +704,18 @@ function Login({ mode, setMode, onSuccess }) {
             </button>
           ))}
         </div>
-        <form onSubmit={submit} className="space-y-4">
+        <form onSubmit={submit} className="space-y-4" autoComplete="off">
           <label className="label-caps mb-1 block text-xs">
             Email
             <input
               className="mt-1 w-full rounded-xl border border-white/10 bg-[#0A3B65]/50 px-4 py-3 text-base outline-none focus:border-[#FFC72C]"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              autoComplete="username"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              name="staff_email"
             />
           </label>
           <label className="label-caps mb-1 block text-xs">
@@ -721,7 +725,8 @@ function Login({ mode, setMode, onSuccess }) {
               className="mt-1 w-full rounded-xl border border-white/10 bg-[#0A3B65]/50 px-4 py-3 text-base outline-none focus:border-[#FFC72C]"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
+              autoComplete="new-password"
+              name="staff_password"
             />
           </label>
           {error && <p className="text-sm text-rose-300">{error}</p>}
