@@ -256,7 +256,7 @@ class AdminController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email', 'max:191', $this->schoolEmailRule(), 'unique:users,email'],
+            'email' => ['required', 'email', 'max:191', $this->staffEmailRule(), 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'max:72'],
         ]);
 
@@ -280,7 +280,7 @@ class AdminController extends Controller
             'name' => ['sometimes', 'required', 'string', 'max:120'],
             'email' => [
                 'sometimes', 'required', 'email', 'max:191',
-                $this->schoolEmailRule(),
+                $this->staffEmailRule(),
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
         ]);
@@ -337,15 +337,11 @@ class AdminController extends Controller
         return response()->json(['ok' => true]);
     }
 
-    /**
-     * Staff and students share the school domain, so both go through the same
-     * check to keep one source of truth for the allowed email domain.
-     */
-    private function schoolEmailRule(): \Closure
+    private function staffEmailRule(): \Closure
     {
         return function (string $attribute, mixed $value, \Closure $fail): void {
-            if (!StudentEmail::isValid((string) $value)) {
-                $fail('The email must be a valid @'.StudentEmail::domain().' address.');
+            if (!StudentEmail::isStaffValid((string) $value)) {
+                $fail('Staff email must be a valid @'.StudentEmail::domain().' or @gmail.com address.');
             }
         };
     }

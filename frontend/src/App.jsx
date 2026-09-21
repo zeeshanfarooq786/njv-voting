@@ -62,6 +62,10 @@ function validSchoolEmail(value) {
   return /^[a-z0-9._%+-]+@njv\.edu\.pk$/i.test(String(value || '').trim())
 }
 
+function validStaffEmail(value) {
+  return /^[a-z0-9._%+-]+@(njv\.edu\.pk|gmail\.com)$/i.test(String(value || '').trim())
+}
+
 /**
  * Positions are stored with an em dash ("President — Grade XII").
  * The database keeps that exact value; only the displayed text is softened.
@@ -1906,8 +1910,8 @@ function StaffPanel({ onNote }) {
     e.preventDefault()
     const address = email.trim().toLowerCase()
 
-    if (!validSchoolEmail(address)) {
-      setError(`Staff email must be a valid @${DOMAIN} address, like sadia.khan@${DOMAIN}`)
+    if (!validStaffEmail(address)) {
+      setError(`Staff email must be @${DOMAIN} or @gmail.com`)
       return
     }
     if (password.length < 8) {
@@ -1946,8 +1950,8 @@ function StaffPanel({ onNote }) {
       setError('Name cannot be empty.')
       return
     }
-    if (!validSchoolEmail(address)) {
-      setError(`Staff email must be a valid @${DOMAIN} address.`)
+    if (!validStaffEmail(address)) {
+      setError(`Staff email must be @${DOMAIN} or @gmail.com`)
       return
     }
 
@@ -2021,7 +2025,7 @@ function StaffPanel({ onNote }) {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-semibold text-white">Add staff</p>
           <span className="rounded-full bg-[#FFC72C]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#FFC72C]">
-            @{DOMAIN} only
+            @{DOMAIN} or Gmail
           </span>
         </div>
 
@@ -2037,7 +2041,7 @@ function StaffPanel({ onNote }) {
             />
           </label>
           <label className="block">
-            <span className="label-caps text-[10px]">School email</span>
+            <span className="label-caps text-[10px]">Email</span>
             <input
               className={input}
               value={email}
@@ -2110,7 +2114,7 @@ function StaffPanel({ onNote }) {
                       placeholder={`name@${DOMAIN}`}
                       inputMode="email"
                     />
-                    <p className="text-[11px] text-white/50">Must be an @{DOMAIN} address.</p>
+                    <p className="text-[11px] text-white/50">@{DOMAIN} or @gmail.com</p>
                     <div className="flex flex-wrap gap-2">
                       <button
                         type="button"
