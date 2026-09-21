@@ -18,6 +18,7 @@ class VotingSession extends Model
         'teacher_id',
         'student_email',
         'student_grade',
+        'student_boarding',
         'token',
         'started_at',
         'ended_at',

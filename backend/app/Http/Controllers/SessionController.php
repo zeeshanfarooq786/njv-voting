@@ -25,6 +25,7 @@ class SessionController extends Controller
         $data = $request->validate([
             'student_email' => ['required', 'string', 'max:255'],
             'student_grade' => ['required', 'string', 'in:'.implode(',', Election::GRADES)],
+            'student_boarding' => ['required', 'string', 'in:'.implode(',', Election::BOARDING)],
         ]);
 
         $email = StudentEmail::normalize($data['student_email']);
@@ -44,8 +45,9 @@ class SessionController extends Controller
         $teacher = $request->user();
 
         $grade = strtoupper($data['student_grade']);
+        $boarding = $data['student_boarding'];
 
-        $session = DB::transaction(function () use ($teacher, $email, $grade) {
+        $session = DB::transaction(function () use ($teacher, $email, $grade, $boarding) {
             VotingSession::query()
                 ->where('teacher_id', $teacher->id)
                 ->where('status', VotingSession::STATUS_ACTIVE)
@@ -56,6 +58,7 @@ class SessionController extends Controller
                 'teacher_id' => $teacher->id,
                 'student_email' => $email,
                 'student_grade' => $grade,
+                'student_boarding' => $boarding,
                 'token' => VotingSession::generateToken(),
                 'started_at' => now(),
                 'expires_at' => now()->addMinutes(VotingSession::IDLE_MINUTES),
@@ -66,6 +69,7 @@ class SessionController extends Controller
         $candidates = Election::ballot(
             Candidate::query()->orderBy('position')->orderBy('name')->get(),
             $grade,
+            $boarding,
         )->map(fn (Candidate $candidate) => [
             'id' => $candidate->id,
             'name' => $candidate->name,
@@ -81,6 +85,7 @@ class SessionController extends Controller
             'session_token' => $session->token,
             'student_email' => $session->student_email,
             'student_grade' => $session->student_grade,
+            'student_boarding' => $session->student_boarding,
             'expires_at' => $session->expires_at->toIso8601String(),
             'election_title' => Setting::electionTitle(),
             'candidates' => $candidates,

@@ -28,6 +28,7 @@ class VoteController extends Controller
         $candidates = Election::ballot(
             Candidate::query()->orderBy('position')->orderBy('name')->get(),
             $session->student_grade,
+            $session->student_boarding,
         )->map(fn (Candidate $candidate) => [
             'id' => $candidate->id,
             'name' => $candidate->name,
@@ -43,6 +44,7 @@ class VoteController extends Controller
             'election_title' => Setting::electionTitle(),
             'student_email' => $session->student_email,
             'student_grade' => $session->student_grade,
+            'student_boarding' => $session->student_boarding,
             'expires_at' => $session->expires_at->toIso8601String(),
             'candidates' => $candidates,
         ]);
@@ -105,8 +107,8 @@ class VoteController extends Controller
                         abort(404, 'Candidate not found.');
                     }
 
-                    if (!Election::visibleForGrade($candidate, $session->student_grade)) {
-                        abort(422, 'This student can only vote for class representatives of their own grade.');
+                    if (!Election::visibleForStudent($candidate, $session->student_grade, $session->student_boarding)) {
+                        abort(422, 'This student is not eligible to vote for that post.');
                     }
 
                     Vote::query()->create([

@@ -24,7 +24,7 @@ import {
 import AmbientField, { Confetti, RippleLayer, spawnRipple } from './Particles'
 import { cardIn, fadeUp, letter } from './motion'
 import { sounds } from './sounds'
-import { ALL_POSTS, ELECTION_CATEGORIES, GRADES, categoryForPost, forLabel, hallKeys, isClassRep, orderedPositions, parseHallKey } from './positions'
+import { ALL_POSTS, BOARDING_OPTIONS, ELECTION_CATEGORIES, GRADES, ballotLabel, categoryForPost, forLabel, hallKeys, isClassRep, orderedPositions, parseHallKey } from './positions'
 
 const TITLE = 'NJV KARACHI'
 const DOMAIN = 'njv.edu.pk'
@@ -745,6 +745,7 @@ function Login({ mode, setMode, onSuccess }) {
 function TeacherStation({ user, onLogout, onSession, onRipple }) {
   const [email, setEmail] = useState('')
   const [grade, setGrade] = useState('IX')
+  const [boarding, setBoarding] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -762,9 +763,13 @@ function TeacherStation({ user, onLogout, onSession, onRipple }) {
       setError('Select the student grade.')
       return
     }
+    if (!BOARDING_OPTIONS.some((o) => o.value === boarding)) {
+      setError('Select hosteller or day scholar.')
+      return
+    }
     setBusy(true)
     try {
-      onSession(await api.startSession(trimmed, grade))
+      onSession(await api.startSession(trimmed, grade, boarding))
     } catch (err) {
       setError(friendlyError(err))
     } finally {
@@ -793,7 +798,7 @@ function TeacherStation({ user, onLogout, onSession, onRipple }) {
       <form onSubmit={start} className="glass rounded-3xl p-8">
         <p className="mb-4 flex items-center gap-2 text-sm text-secondary">
           <IconMail size={15} className="text-[#FFC72C]" />
-          One student. One voice. Enter school email and grade, then choose the council.
+          One student. One voice. Enter school email, grade, and residence, then choose the council.
         </p>
         <input
           className="w-full rounded-2xl border border-white/10 bg-[#0A3B65]/50 px-5 py-4 text-xl outline-none focus:border-[#FFC72C]"
@@ -802,20 +807,37 @@ function TeacherStation({ user, onLogout, onSession, onRipple }) {
           onChange={(e) => setEmail(e.target.value)}
           autoFocus
         />
-        <label className="mt-4 block text-xs font-semibold uppercase tracking-[0.18em] text-[#FFC72C]">
-          Student grade
-          <select
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-[#0A3B65]/50 px-5 py-4 text-lg text-white outline-none focus:border-[#FFC72C]"
-            value={grade}
-            onChange={(e) => setGrade(e.target.value)}
-          >
-            {GRADES.map((g) => (
-              <option key={g} value={g}>
-                Grade {g}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[#FFC72C]">
+            Grade
+            <select
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-[#0A3B65]/50 px-4 py-3.5 text-base text-white outline-none focus:border-[#FFC72C]"
+              value={grade}
+              onChange={(e) => setGrade(e.target.value)}
+            >
+              {GRADES.map((g) => (
+                <option key={g} value={g}>
+                  Grade {g}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[#FFC72C]">
+            Residence
+            <select
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-[#0A3B65]/50 px-4 py-3.5 text-base text-white outline-none focus:border-[#FFC72C]"
+              value={boarding}
+              onChange={(e) => setBoarding(e.target.value)}
+            >
+              <option value="">Select…</option>
+              {BOARDING_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
         {error && <p className="mt-3 text-rose-300">{error}</p>}
         <button
           disabled={busy}
@@ -882,6 +904,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
     return {
       election_title: session.election_title,
       student_email: session.student_email,
+      student_grade: session.student_grade,
       expires_at: session.expires_at,
       candidates: withCachedPhotos(session.candidates),
     }
@@ -915,6 +938,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
           setData((cur) => ({
             election_title: d.election_title || cur?.election_title,
             student_email: d.student_email,
+            student_grade: d.student_grade,
             expires_at: d.expires_at,
             candidates: withCachedPhotos(d.candidates || cur?.candidates || []),
           }))
@@ -1029,7 +1053,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                       <div key={position} className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#0A3B65]/45 px-3 py-2">
                         {c ? <Avatar candidate={c} size={56} /> : null}
                         <div className="min-w-0 flex-1">
-                          <p className="text-[11px] text-[#FFC72C]">{forLabel(position)}</p>
+                          <p className="text-[11px] text-[#FFC72C]">{ballotLabel(position, session.student_grade || data?.student_grade)}</p>
                           <p className="truncate text-sm font-medium text-white">{c?.name || 'Not selected'}</p>
                         </div>
                         <button
@@ -1062,9 +1086,14 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                   {currentCat?.title || 'Ballot'}
                 </p>
                 <div className="mb-3 flex shrink-0 items-end justify-between gap-3">
-                  <h2 className="flex items-center gap-2 text-xl font-medium text-white">
-                    <IconUser size={20} className="text-[#FFC72C]" />
-                    {forLabel(currentPost)}
+                  <h2 className="flex min-w-0 flex-wrap items-center gap-2 text-xl font-medium text-white">
+                    <IconUser size={20} className="shrink-0 text-[#FFC72C]" />
+                    <span>{forLabel(currentPost)}</span>
+                    {isClassRep(currentPost) && (session.student_grade || data?.student_grade) ? (
+                      <span className="rounded-full border border-[#FFC72C]/45 bg-[#FFC72C]/15 px-3 py-0.5 text-sm font-medium tracking-normal text-[#FFC72C]">
+                        Grade {session.student_grade || data?.student_grade}
+                      </span>
+                    ) : null}
                   </h2>
                   <p className="flex items-center gap-1 text-[11px] text-white/45">
                     <IconClock size={13} />

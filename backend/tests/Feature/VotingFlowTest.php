@@ -57,6 +57,7 @@ class VotingFlowTest extends TestCase
         $start = $this->withToken($token)->postJson('/api/session/start', [
             'student_email' => $student,
             'student_grade' => 'IX',
+            'student_boarding' => 'hosteller',
         ]);
 
         $start->assertCreated()->assertJsonStructure(['session_token', 'student_email']);
@@ -73,6 +74,7 @@ class VotingFlowTest extends TestCase
         $this->withToken($token)->postJson('/api/session/start', [
             'student_email' => 'student@gmail.com',
             'student_grade' => 'IX',
+            'student_boarding' => 'hosteller',
         ])->assertStatus(422);
     }
 
@@ -116,6 +118,7 @@ class VotingFlowTest extends TestCase
         $this->withToken($teacherToken)->postJson('/api/session/start', [
             'student_email' => $student,
             'student_grade' => 'IX',
+            'student_boarding' => 'hosteller',
         ])->assertStatus(409);
     }
 
@@ -141,6 +144,7 @@ class VotingFlowTest extends TestCase
         $this->withToken($teacherToken)->postJson('/api/session/start', [
             'student_email' => StudentEmail::address('ahmed.001'),
             'student_grade' => 'IX',
+            'student_boarding' => 'hosteller',
         ])->assertStatus(403);
     }
 
@@ -177,6 +181,7 @@ class VotingFlowTest extends TestCase
         $response = $this->withToken($teacherToken)->postJson('/api/session/start', [
             'student_email' => $email,
             'student_grade' => 'IX',
+            'student_boarding' => 'hosteller',
         ]);
 
         $token = $response->json('session_token');

@@ -16,6 +16,11 @@ export const BALLOT_ORDER = [
   'Deputy Sports Committee Head',
 ]
 
+export const BOARDING_OPTIONS = [
+  { value: 'hosteller', label: 'Hosteller' },
+  { value: 'day_scholar', label: 'Day scholar' },
+]
+
 export const CLASS_REP_POSTS = [
   'Male Batch/Class Representative',
   'Female Batch/Class Representative',
@@ -71,6 +76,12 @@ export function forLabel(position) {
   const v = String(position ?? '').trim()
   if (!v) return ''
   return /^for\s/i.test(v) ? v : `For ${v}`
+}
+
+export function ballotLabel(position, grade) {
+  const label = forLabel(position)
+  if (isClassRep(position) && grade) return `${label} · Grade ${grade}`
+  return label
 }
 
 export function hallKeys(candidates = []) {
