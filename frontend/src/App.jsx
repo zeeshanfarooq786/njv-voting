@@ -649,13 +649,13 @@ function WaitOverlay({ show, title = 'Please wait', hint = 'Just a moment' }) {
 }
 
 function Login({ mode, setMode, onSuccess }) {
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(mode === 'admin' ? `admin@${DOMAIN}` : '')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
-    setEmail('')
+    setEmail(mode === 'admin' ? `admin@${DOMAIN}` : '')
     setPassword('')
     setError('')
   }, [mode])
