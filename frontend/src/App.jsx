@@ -738,7 +738,7 @@ function Login({ mode, setMode, onSuccess }) {
             disabled={busy}
             className="btn-gold w-full rounded-xl py-3 font-semibold tracking-widest uppercase"
           >
-            {busy ? 'Signing in…' : mode === 'admin' ? 'Enter as admin' : 'Enter as polling officer'}
+            {busy ? 'Signing in…' : mode === 'admin' ? 'Enter' : 'Enter'}
           </button>
         </form>
       </div>
