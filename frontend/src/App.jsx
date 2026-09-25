@@ -700,11 +700,11 @@ function Login({ mode, setMode, onSuccess }) {
             <button
               key={m}
               onClick={() => setMode(m)}
-              className={`rounded-full py-2 text-sm font-semibold uppercase tracking-widest ${
+              className={`rounded-full px-2 py-2 text-xs font-semibold uppercase tracking-wide sm:text-sm ${
                 mode === m ? 'bg-[#FFC72C] text-[#0A3B65]' : 'text-white/85'
               }`}
             >
-              {m}
+              {m === 'teacher' ? 'Polling officer' : 'Admin'}
             </button>
           ))}
         </div>
@@ -738,7 +738,7 @@ function Login({ mode, setMode, onSuccess }) {
             disabled={busy}
             className="btn-gold w-full rounded-xl py-3 font-semibold tracking-widest uppercase"
           >
-            {busy ? 'Signing in…' : `Enter as ${mode}`}
+            {busy ? 'Signing in…' : mode === 'admin' ? 'Enter as admin' : 'Enter as polling officer'}
           </button>
         </form>
       </div>
