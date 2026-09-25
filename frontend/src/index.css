@@ -506,13 +506,19 @@ input:disabled,
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  gap: 0.35em 0.55em;
   font-family: "Outfit", sans-serif;
   font-weight: 800;
-  font-size: clamp(1.05rem, 4.6vw, 1.55rem);
+  font-size: clamp(0.95rem, 4.2vw, 1.45rem);
   letter-spacing: 0.06em;
   line-height: 1.25;
   text-transform: uppercase;
   filter: drop-shadow(0 0 14px rgba(255, 199, 44, 0.5));
+}
+
+.brandmark-word {
+  display: inline-flex;
+  white-space: nowrap;
 }
 
 .brandmark-school-hero span {

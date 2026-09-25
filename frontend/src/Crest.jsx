@@ -28,9 +28,13 @@ export function BrandMark({ size = 48, subtitle, prominent = false }) {
           <Crest size={size} glow />
         </span>
         <p className="brandmark-school-hero mt-4" aria-label={title}>
-          {title.split('').map((ch, i) => (
-            <span key={`${ch}-${i}`} style={{ animationDelay: `${i * 0.045}s` }}>
-              {ch === ' ' ? '\u00A0' : ch}
+          {title.split(' ').map((word, wi) => (
+            <span key={word} className="brandmark-word">
+              {word.split('').map((ch, i) => (
+                <span key={`${word}-${i}`} style={{ animationDelay: `${(wi * 8 + i) * 0.045}s` }}>
+                  {ch}
+                </span>
+              ))}
             </span>
           ))}
         </p>
