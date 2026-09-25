@@ -693,7 +693,7 @@ function Login({ mode, setMode, onSuccess }) {
       <WaitOverlay show={busy} title="Signing you in" hint="Just a moment" />
       <div className="glass w-full max-w-md rounded-3xl p-8">
         <div className="mb-6">
-          <BrandMark size={64} />
+          <BrandMark size={88} prominent />
         </div>
         <div className="mb-6 grid grid-cols-2 rounded-full bg-[#0A3B65]/70 p-1">
           {['teacher', 'admin'].map((m) => (

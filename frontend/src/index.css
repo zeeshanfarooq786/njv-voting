@@ -485,6 +485,32 @@ input:disabled,
   white-space: nowrap;
 }
 
+.brandmark-school-hero {
+  font-family: "Outfit", sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.05rem, 4.6vw, 1.55rem);
+  letter-spacing: 0.06em;
+  line-height: 1.25;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #b8860b, #ffc72c, #fff6c8, #ffc72c, #b8860b);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 14px rgba(255, 199, 44, 0.45));
+  animation: school-shine 3.4s linear infinite, school-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes school-shine {
+  0% { background-position: 0% center; }
+  100% { background-position: 220% center; }
+}
+
+@keyframes school-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
 .brandmark-title {
   font-family: "Outfit", sans-serif;
   font-weight: 200;

@@ -17,7 +17,19 @@ export default function Crest({ size = 56, className = '', glow = false }) {
   )
 }
 
-export function BrandMark({ size = 48, subtitle }) {
+export function BrandMark({ size = 48, subtitle, prominent = false }) {
+  if (prominent) {
+    return (
+      <div className="brandmark-hero flex flex-col items-center text-center">
+        <span className="crest-float inline-flex">
+          <Crest size={size} glow />
+        </span>
+        <p className="brandmark-school-hero mt-3">NJV GOVT. HIGHER SECONDARY SCHOOL</p>
+        <p className="brandmark-title mt-1 font-display text-white">{subtitle || 'KARACHI'}</p>
+      </div>
+    )
+  }
+
   return (
     <div className="brandmark flex min-w-0 items-center gap-2 sm:gap-3">
       <span className="crest-float inline-flex">
