@@ -26,7 +26,7 @@ export function BrandMark({ size = 48, subtitle, prominent = false }) {
           <span className="brandmark-halo brandmark-halo-delay" aria-hidden />
           <Crest size={size} glow />
         </span>
-        <p className="brandmark-school-hero mt-4">
+        <p className="brandmark-school-hero">
           NJV GOVT. HIGHER
           <br />
           SECONDARY SCHOOL
