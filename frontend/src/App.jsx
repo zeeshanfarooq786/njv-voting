@@ -1869,6 +1869,66 @@ function Toggle({ open, declared, onChange }) {
   )
 }
 
+function AdminPasswordForm({ onNote }) {
+  const [current, setCurrent] = useState('')
+  const [next, setNext] = useState('')
+  const [repeat, setRepeat] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const input = 'w-full rounded-lg bg-[#0A3B65]/80 px-3 py-2 text-white outline-none focus:border-[#FFC72C] border border-white/15'
+
+  async function save(e) {
+    e.preventDefault()
+    if (next.length < 8) {
+      setError('New password must be at least 8 characters.')
+      return
+    }
+    if (next !== repeat) {
+      setError('The two new passwords do not match.')
+      return
+    }
+    setBusy(true)
+    setError('')
+    try {
+      await api.updateAdminPassword({
+        current_password: current,
+        password: next,
+        password_confirmation: repeat,
+      })
+      setCurrent('')
+      setNext('')
+      setRepeat('')
+      onNote?.('Admin password updated')
+    } catch (err) {
+      setError(friendlyError(err) || 'Could not update password.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <form onSubmit={save} className="admin-card space-y-3">
+      <p className="text-sm font-semibold text-white">Change admin password</p>
+      <label className="label-caps block text-[10px]">
+        Current password
+        <input className={`${input} mt-1`} type="password" value={current} onChange={(e) => setCurrent(e.target.value)} autoComplete="current-password" required />
+      </label>
+      <label className="label-caps block text-[10px]">
+        New password
+        <input className={`${input} mt-1`} type="password" value={next} onChange={(e) => setNext(e.target.value)} autoComplete="new-password" required />
+      </label>
+      <label className="label-caps block text-[10px]">
+        Repeat new password
+        <input className={`${input} mt-1`} type="password" value={repeat} onChange={(e) => setRepeat(e.target.value)} autoComplete="new-password" required />
+      </label>
+      {error && <p className="text-xs text-rose-300">{error}</p>}
+      <button disabled={busy} className="btn-gold w-full rounded-lg py-2 text-sm font-semibold">
+        {busy ? 'Saving…' : 'Update password'}
+      </button>
+    </form>
+  )
+}
+
 function StaffPanel({ onNote }) {
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
@@ -2697,6 +2757,7 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
       )}
 
       {tab === 'settings' && (
+        <div className="space-y-3">
         <form onSubmit={saveEligible} className="admin-card space-y-3">
           <p className="text-sm font-semibold text-white">Election settings</p>
           <label className="label-caps block text-[10px]">Total eligible students</label>
@@ -2711,6 +2772,8 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
             Save eligible count
           </button>
         </form>
+        <AdminPasswordForm onNote={note} />
+        </div>
       )}
 
       {tab === 'staff' && <StaffPanel onNote={note} />}

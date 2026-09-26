@@ -296,6 +296,18 @@ class AdminController extends Controller
         ]);
     }
 
+    public function updatePassword(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'current_password' => ['required', 'current_password:sanctum'],
+            'password' => ['required', 'string', 'min:8', 'max:72', 'confirmed'],
+        ]);
+
+        $request->user()->update(['password' => $data['password']]);
+
+        return response()->json(['ok' => true]);
+    }
+
     public function updateTeacherPassword(Request $request, User $user): JsonResponse
     {
         $this->assertTeacher($user);

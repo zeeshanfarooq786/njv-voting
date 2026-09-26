@@ -185,6 +185,7 @@ export const api = {
   updateTeacher: (id, body) => request(`/admin/teachers/${id}`, { method: 'PUT', json: body }),
   destroyTeacher: (id) => request(`/admin/teachers/${id}`, { method: 'DELETE' }),
   updateTeacherPassword: (id, body) => request(`/admin/teachers/${id}/password`, { method: 'POST', json: body }),
+  updateAdminPassword: (body) => request('/admin/password', { method: 'POST', json: body }),
   storeCandidate: (form) => request('/admin/candidates', { method: 'POST', form }),
   updateCandidate: (id, form) => request(`/admin/candidates/${id}`, { method: 'POST', form }),
   renameCandidate: (id, body) => request(`/admin/candidates/${id}`, { method: 'PUT', json: body }),

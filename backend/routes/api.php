@@ -40,4 +40,5 @@ Route::middleware(['auth:sanctum', 'role:admin', 'throttle:240,1'])->group(funct
     Route::put('/admin/teachers/{user}', [AdminController::class, 'updateTeacher']);
     Route::delete('/admin/teachers/{user}', [AdminController::class, 'destroyTeacher']);
     Route::post('/admin/teachers/{user}/password', [AdminController::class, 'updateTeacherPassword']);
+    Route::post('/admin/password', [AdminController::class, 'updatePassword']);
 });
