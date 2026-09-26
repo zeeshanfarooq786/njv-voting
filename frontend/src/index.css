@@ -503,32 +503,20 @@ input:disabled,
 }
 
 .brandmark-school-hero {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.35em 0.55em;
+  margin: 0;
   font-family: "Outfit", sans-serif;
   font-weight: 800;
-  font-size: clamp(0.95rem, 4.2vw, 1.45rem);
-  letter-spacing: 0.06em;
-  line-height: 1.25;
+  font-size: clamp(1.05rem, 4.4vw, 1.5rem);
+  letter-spacing: 0.08em;
+  line-height: 1.28;
   text-transform: uppercase;
-  filter: drop-shadow(0 0 14px rgba(255, 199, 44, 0.5));
-}
-
-.brandmark-word {
-  display: inline-flex;
-  white-space: nowrap;
-}
-
-.brandmark-school-hero span {
-  display: inline-block;
   background: linear-gradient(90deg, #b8860b, #ffc72c, #fff6c8, #ffc72c, #b8860b);
   background-size: 220% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: school-shine 3.2s linear infinite, letter-wave 2.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px rgba(255, 199, 44, 0.45));
+  animation: school-shine 3.4s linear infinite, school-pulse 2.8s ease-in-out infinite;
 }
 
 .brandmark-gold-line {
@@ -552,9 +540,9 @@ input:disabled,
   100% { background-position: 220% center; }
 }
 
-@keyframes letter-wave {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+@keyframes school-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
 }
 
 @keyframes halo-ring {

@@ -19,7 +19,6 @@ export default function Crest({ size = 56, className = '', glow = false }) {
 
 export function BrandMark({ size = 48, subtitle, prominent = false }) {
   if (prominent) {
-    const title = 'NJV GOVT. HIGHER SECONDARY SCHOOL'
     return (
       <div className="brandmark-hero flex flex-col items-center text-center">
         <span className="brandmark-crest-wrap crest-float inline-flex">
@@ -27,16 +26,10 @@ export function BrandMark({ size = 48, subtitle, prominent = false }) {
           <span className="brandmark-halo brandmark-halo-delay" aria-hidden />
           <Crest size={size} glow />
         </span>
-        <p className="brandmark-school-hero mt-4" aria-label={title}>
-          {title.split(' ').map((word, wi) => (
-            <span key={word} className="brandmark-word">
-              {word.split('').map((ch, i) => (
-                <span key={`${word}-${i}`} style={{ animationDelay: `${(wi * 8 + i) * 0.045}s` }}>
-                  {ch}
-                </span>
-              ))}
-            </span>
-          ))}
+        <p className="brandmark-school-hero mt-4">
+          NJV GOVT. HIGHER
+          <br />
+          SECONDARY SCHOOL
         </p>
         <span className="brandmark-gold-line" aria-hidden />
         <p className="brandmark-title brandmark-title-hero mt-2 font-display text-white">{subtitle || 'KARACHI'}</p>
