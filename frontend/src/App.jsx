@@ -323,7 +323,7 @@ function PresentationShow({ board, onExit }) {
             {nominees.map((c, i) => {
               const lead = nominees.every((o) => o.vote_count <= c.vote_count) && c.vote_count > 0
               const pack = nominees.length > 1
-              const photo = nominees.length <= 2 ? 88 : nominees.length <= 4 ? 64 : 52
+              const photo = nominees.length <= 2 ? 128 : nominees.length <= 4 ? 104 : 88
               return (
                 <motion.div
                   key={`${post}-${c.id}-${index}`}
