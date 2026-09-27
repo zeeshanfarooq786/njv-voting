@@ -1035,7 +1035,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
             <BrandMark size={80} />
             <HandwrittenTitle
               text="NJV Government School Student Council Election 2026"
-              className="mb-2 max-w-5xl text-xl font-semibold sm:text-3xl md:text-4xl"
+              className="handwrite-title-strong mb-2 max-w-5xl text-xl sm:text-3xl md:text-4xl"
             />
             <p className="mt-1 text-xs text-white/55">{session.student_email}</p>
           </div>
