@@ -1055,7 +1055,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                     const c = (data?.candidates || []).find((row) => row.id === picked[position])
                     return (
                       <div key={position} className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#0A3B65]/45 px-3 py-2">
-                        {c ? <Avatar candidate={c} size={56} /> : null}
+                        {c ? <Avatar candidate={c} size={72} /> : null}
                         <div className="min-w-0 flex-1">
                           <p className="text-[11px] text-[#FFC72C]">{ballotLabel(position, session.student_grade || data?.student_grade)}</p>
                           <p className="truncate text-sm font-medium text-white">{c?.name || 'Not selected'}</p>
@@ -1118,7 +1118,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                   {currentList.map((c, i) => {
                     const active = picked[currentPost] === c.id
                     const n = currentList.length
-                    const photo = n <= 2 ? 96 : n <= 4 ? 76 : 64
+                    const photo = n <= 2 ? 128 : n <= 4 ? 108 : 92
                     const pack = n > 2
                     return (
                       <motion.button
@@ -1750,7 +1750,7 @@ function AdminBoard({ user, onLogout, initialResults }) {
                   <span className="absolute inset-x-0 top-0 h-0.5" style={{ background: c.color_tag || '#FFC72C' }} />
                   <div className="mb-1 flex items-center gap-4">
                     <Ring pct={pct} color={c.color_tag}>
-                      <Avatar candidate={c} size={76} showMissing />
+                      <Avatar candidate={c} size={96} showMissing />
                     </Ring>
                     <div className="flex-1">
                       <div className="flex items-baseline justify-between gap-3">
@@ -2598,7 +2598,7 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
                 {editingId === c.id ? (
                   <form onSubmit={saveEdit} className="space-y-2">
                     <div className="flex items-center gap-3">
-                      <Avatar candidate={c} size={40} showMissing />
+                      <Avatar candidate={c} size={72} showMissing />
                       <div className="min-w-0 flex-1 space-y-2">
                         <input className="w-full rounded-lg bg-[#0A3B65]/80 px-3 py-2 text-sm text-white" value={editName} onChange={(e) => setEditName(e.target.value)} required />
                         <select className="w-full rounded-lg bg-[#0A3B65]/80 px-3 py-2 text-sm text-white" value={editPosition} onChange={(e) => setEditPosition(e.target.value)} required>
@@ -2620,7 +2620,7 @@ function AdminSide({ results, onRefresh, onLocalCandidate }) {
                 ) : (
                   <div className="flex items-center gap-3">
                     <label className="relative cursor-pointer">
-                      <Avatar candidate={c} size={40} showMissing />
+                      <Avatar candidate={c} size={72} showMissing />
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
