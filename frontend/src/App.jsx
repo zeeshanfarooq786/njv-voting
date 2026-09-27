@@ -594,7 +594,7 @@ function Splash() {
   )
 }
 
-function HandwrittenTitle({ text }) {
+function HandwrittenTitle({ text, className = '' }) {
   const [cycle, setCycle] = useState(0)
   const letters = text.length
 
@@ -606,7 +606,7 @@ function HandwrittenTitle({ text }) {
   }, [cycle, letters])
 
   return (
-    <p className="handwrite-title mb-5 max-w-3xl text-[15px] leading-snug text-[#FFC72C] sm:text-lg md:text-xl">
+    <p className={`handwrite-title mb-5 max-w-3xl text-[15px] leading-snug text-[#FFC72C] sm:text-lg md:text-xl ${className}`}>
       {text.split('').map((ch, i) => (
         <motion.span
           key={`${cycle}-${i}`}
@@ -1033,8 +1033,11 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
         <header className="mb-2 flex shrink-0 items-center justify-between gap-4">
           <div>
             <BrandMark size={80} />
-            <HandwrittenTitle text="NJV Government School Student Council Election 2026" />
-            <p className="mt-1 text-xs text-white/55">{session.student_email}</p>
+            <HandwrittenTitle
+              text="NJV Government School Student Council Election 2026"
+              className="mb-2 max-w-5xl text-lg font-semibold sm:text-2xl md:text-3xl"
+            />
+            <p className="mt-1 text-base font-semibold tracking-wide text-white sm:text-xl">{session.student_email}</p>
           </div>
           <button onClick={onCancel} className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-4 py-2 text-sm">
             <IconExit size={14} />
