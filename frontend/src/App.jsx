@@ -1190,16 +1190,18 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
         animate="show"
       >
         <div className="page-shell pointer-events-auto">
-          <div className="mx-auto flex max-w-xl items-center gap-3 rounded-full border border-[#FFC72C]/30 bg-[#0A3B65]/85 px-3 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-md">
+          <div className="mx-auto flex max-w-xl items-center justify-between gap-3 rounded-full border border-[#FFC72C]/30 bg-[#0A3B65]/85 px-3 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-md">
             <button
               type="button"
               disabled={step <= 0}
               onClick={() => setStep((s) => Math.max(0, s - 1))}
-              className="rounded-full border border-white/20 px-4 py-2 text-sm disabled:opacity-30"
+              className="rounded-full border border-white/20 px-3 py-2 text-sm disabled:opacity-30 sm:px-4"
+              aria-label="Previous"
             >
-              Previous
+              <span className="sm:hidden">‹</span>
+              <span className="hidden sm:inline">Previous</span>
             </button>
-            <div className="min-w-0 flex-1">
+            <div className="hidden min-w-0 flex-1 sm:block">
               <p className="truncate text-sm font-semibold text-white">
                 {reviewing ? 'Review and confirm' : currentPost || 'Ballot'}
               </p>
@@ -1214,9 +1216,9 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                 onClick={submit}
                 whileHover={canNext && !busy ? { scale: 1.04 } : undefined}
                 whileTap={canNext && !busy ? { scale: 0.96 } : undefined}
-                className={`btn-gold rounded-full px-5 py-2 text-sm font-bold uppercase tracking-wider disabled:opacity-40 ${canNext && !busy ? 'vote-submit' : ''}`}
+                className={`btn-gold rounded-full px-4 py-2 text-sm font-bold uppercase tracking-wider disabled:opacity-40 sm:px-5 ${canNext && !busy ? 'vote-submit' : ''}`}
               >
-                {busy ? 'Recording…' : 'Cast vote'}
+                {busy ? '…' : <><span className="sm:hidden">✓</span><span className="hidden sm:inline">Cast vote</span></>}
               </motion.button>
             ) : (
               <button
@@ -1226,9 +1228,11 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                   sounds.select()
                   setStep((s) => s + 1)
                 }}
-                className="btn-gold rounded-full px-5 py-2 text-sm font-bold uppercase tracking-wider disabled:opacity-40"
+                className="btn-gold rounded-full px-3 py-2 text-sm font-bold uppercase tracking-wider disabled:opacity-40 sm:px-5"
+                aria-label="Next"
               >
-                Next
+                <span className="sm:hidden">›</span>
+                <span className="hidden sm:inline">Next</span>
               </button>
             )}
           </div>
