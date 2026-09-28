@@ -70,6 +70,17 @@ function validStaffEmail(value) {
  * Positions are stored with an em dash ("President — Grade XII").
  * The database keeps that exact value; only the displayed text is softened.
  */
+function useNarrow(max = 700) {
+  const [narrow, setNarrow] = useState(() => typeof window !== 'undefined' && window.innerWidth <= max)
+  useEffect(() => {
+    const onResize = () => setNarrow(window.innerWidth <= max)
+    onResize()
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [max])
+  return narrow
+}
+
 function prettyText(value) {
   return String(value ?? '')
     .replace(/\s*[—–]\s*/g, ' · ')
@@ -185,6 +196,7 @@ const TV_ENTRANCES = [
 ]
 
 function PresentationShow({ board, onExit }) {
+  const narrow = useNarrow()
   const ended = !!board.winners_declared
   const [musicOn, setMusicOn] = useState(true)
 
@@ -311,8 +323,9 @@ function PresentationShow({ board, onExit }) {
           <div
             className="grid min-h-0 flex-1 content-start items-stretch justify-items-stretch gap-3 overflow-visible pt-2"
             style={{
-              gridTemplateColumns:
-                nominees.length <= 1
+              gridTemplateColumns: narrow
+                ? 'minmax(0, 1fr)'
+                : nominees.length <= 1
                   ? 'minmax(0, min(560px, 100%))'
                   : nominees.length <= 4
                     ? 'repeat(2, minmax(0, 1fr))'
@@ -322,8 +335,8 @@ function PresentationShow({ board, onExit }) {
           >
             {nominees.map((c, i) => {
               const lead = nominees.every((o) => o.vote_count <= c.vote_count) && c.vote_count > 0
-              const pack = nominees.length > 1
-              const photo = nominees.length <= 2 ? 128 : nominees.length <= 4 ? 104 : 88
+              const pack = !narrow && nominees.length > 1
+              const photo = narrow ? 120 : nominees.length <= 2 ? 128 : nominees.length <= 4 ? 104 : 88
               return (
                 <motion.div
                   key={`${post}-${c.id}-${index}`}
@@ -903,6 +916,7 @@ function FancyCheck({ checked, onChange, label }) {
 }
 
 function VoteGrid({ session, onCancel, onCast, onRipple }) {
+  const narrow = useNarrow()
   const [data, setData] = useState(() => {
     if (!session?.candidates) return null
     return {
@@ -1045,7 +1059,7 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
           </button>
         </header>
         <div className="flex min-h-0 flex-1 flex-col gap-3 pb-24">
-          <div className={`no-scrollbar min-h-0 min-w-0 flex-1 pr-1 ${reviewing ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+          <div className={`no-scrollbar min-h-0 min-w-0 flex-1 pr-1 ${reviewing || narrow ? 'overflow-y-auto' : 'overflow-hidden'}`}>
             {reviewing ? (
               <div className="max-w-3xl">
                 <p className="mb-1 flex items-center gap-1.5 text-[11px] font-medium tracking-[0.2em] text-[#FFC72C] uppercase">
@@ -1110,8 +1124,9 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                 <div
                   className="grid min-h-0 flex-1 content-start gap-3"
                   style={{
-                    gridTemplateColumns:
-                      currentList.length <= 1
+                    gridTemplateColumns: narrow
+                      ? 'minmax(0, 1fr)'
+                      : currentList.length <= 1
                         ? 'minmax(0, 1fr)'
                         : currentList.length <= 4
                           ? 'repeat(2, minmax(0, 1fr))'
@@ -1121,8 +1136,8 @@ function VoteGrid({ session, onCancel, onCast, onRipple }) {
                   {currentList.map((c, i) => {
                     const active = picked[currentPost] === c.id
                     const n = currentList.length
-                    const photo = n <= 2 ? 128 : n <= 4 ? 108 : 92
-                    const pack = n > 2
+                    const photo = narrow ? 112 : n <= 2 ? 128 : n <= 4 ? 108 : 92
+                    const pack = !narrow && n > 2
                     return (
                       <motion.button
                         key={c.id}

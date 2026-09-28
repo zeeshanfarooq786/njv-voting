@@ -633,6 +633,17 @@ input:disabled,
   }
 }
 
+@media (max-width: 700px) {
+  .vote-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .hall-name {
+    white-space: normal;
+  }
+}
+
 @media (max-width: 640px) {
   .photo-drop {
     min-height: 120px;
