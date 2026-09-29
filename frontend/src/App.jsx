@@ -283,10 +283,9 @@ function PresentationShow({ board, onExit }) {
           transition={{ duration: ended ? 0.4 : 0.7, ease: [0.22, 1, 0.36, 1] }}
           style={ended ? undefined : { transformOrigin: 'center', backfaceVisibility: 'hidden' }}
         >
-          <p className="truncate text-[10px] font-medium tracking-[0.18em] text-[#FFC72C] uppercase sm:text-xs">{cat}</p>
-          <p className={`flex items-center gap-2 text-sm font-medium text-white sm:text-base ${ended ? 'mb-2' : 'mb-3 sm:mb-4'}`}>
-            <IconUser size={16} className="shrink-0 text-[#FFC72C]" />
-            <span className="truncate">{forLabel(post)}{postGrade ? ` · Grade ${postGrade}` : ''}</span>
+          <p className="text-center text-[10px] font-bold tracking-[0.18em] text-[#FFC72C] uppercase sm:text-xs">{cat}</p>
+          <p className={`text-center text-sm font-bold text-white sm:text-lg ${ended ? 'mb-2' : 'mb-3 sm:mb-4'}`}>
+            {forLabel(post)}{postGrade ? ` · Grade ${postGrade}` : ''}
           </p>
           {ended ? (
             <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden pt-2">
