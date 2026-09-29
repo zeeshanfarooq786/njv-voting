@@ -59,7 +59,7 @@ class AuthController extends Controller
             ]);
         }
 
-        $token = $user->createToken($role.'-session', [$role])->plainTextToken;
+        $token = $user->createToken($role.'-session', [$role], now()->addHours(24))->plainTextToken;
 
         return response()->json([
             'token' => $token,

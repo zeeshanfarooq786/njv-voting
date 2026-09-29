@@ -439,17 +439,18 @@ export default function App() {
     if (!token || (role !== 'admin' && role !== 'teacher')) return undefined
 
     let cancelled = false
-    api.me(role).catch((err) => {
-      if (cancelled) return
-      if (err?.status === 401 || /unauthenticated/i.test(String(err?.message || ''))) {
-        forceLogout(role)
-      }
-    })
+    api.me(role).catch(() => {})
 
-    const onUnauth = () => forceLogout(getRole() || loginMode)
+    const keepAlive = setInterval(() => {
+      if (cancelled) return
+      api.me(getRole() || role).catch(() => {})
+    }, 4 * 60 * 1000)
+
+    const onUnauth = () => {}
     window.addEventListener('njv:unauthenticated', onUnauth)
     return () => {
       cancelled = true
+      clearInterval(keepAlive)
       window.removeEventListener('njv:unauthenticated', onUnauth)
     }
   }, [])
