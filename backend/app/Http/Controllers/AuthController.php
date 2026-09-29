@@ -59,7 +59,6 @@ class AuthController extends Controller
             ]);
         }
 
-        $user->tokens()->where('name', $role.'-session')->delete();
         $token = $user->createToken($role.'-session', [$role])->plainTextToken;
 
         return response()->json([

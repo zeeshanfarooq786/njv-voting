@@ -522,13 +522,9 @@ export default function App() {
             key="confirm"
             result={voteResult}
             onDone={() => {
-              api.logout('teacher').catch(() => {})
-              clearAuth()
-              setUser(null)
               setSession(null)
               setVoteResult(null)
-              setLoginMode('teacher')
-              setScreen('login')
+              setScreen('station')
             }}
           />
         ) : (

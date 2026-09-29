@@ -81,8 +81,25 @@ class VoteController extends Controller
                     ->lockForUpdate()
                     ->first();
 
-                if (!$session || !$session->isActive()) {
+                if (!$session) {
                     abort(403, 'This voting session is no longer active.');
+                }
+
+                if ($session->status === VotingSession::STATUS_VOTED) {
+                    abort(409, 'This student has already voted.');
+                }
+
+                if ($session->status !== VotingSession::STATUS_ACTIVE) {
+                    $session->update([
+                        'status' => VotingSession::STATUS_ACTIVE,
+                        'ended_at' => null,
+                        'expires_at' => now()->addMinutes(VotingSession::IDLE_MINUTES),
+                    ]);
+                    $session->refresh();
+                } else {
+                    $session->update([
+                        'expires_at' => now()->addMinutes(VotingSession::IDLE_MINUTES),
+                    ]);
                 }
 
                 if (Vote::query()->where('student_email', $session->student_email)->exists()) {

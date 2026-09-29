@@ -127,7 +127,12 @@ async function request(path, { method = 'GET', json, form } = {}) {
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
     data.status = res.status
-    if (res.status === 401 && typeof window !== 'undefined') {
+    if (
+      res.status === 401 &&
+      typeof window !== 'undefined' &&
+      path !== '/teacher/login' &&
+      path !== '/admin/login'
+    ) {
       window.dispatchEvent(new CustomEvent('njv:unauthenticated'))
     }
     fail(data)
