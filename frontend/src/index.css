@@ -113,6 +113,27 @@ body {
   white-space: nowrap;
 }
 
+.hall-for-line {
+  text-align: center;
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
+  font-size: clamp(0.95rem, 2.2vw, 1.3rem);
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  background: linear-gradient(90deg, #ffffff 0%, #ffc72c 28%, #fff4c0 50%, #ffc72c 72%, #ffffff 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 12px rgba(255, 199, 44, 0.4));
+  animation: hall-for-shine 3.4s ease-in-out infinite;
+}
+
+@keyframes hall-for-shine {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
 .handwrite-title {
   font-family: Georgia, "Times New Roman", serif;
   font-weight: 400;

@@ -284,9 +284,15 @@ function PresentationShow({ board, onExit }) {
           style={ended ? undefined : { transformOrigin: 'center', backfaceVisibility: 'hidden' }}
         >
           <p className="truncate text-[10px] font-medium tracking-[0.18em] text-[#FFC72C] uppercase sm:text-xs">{cat}</p>
-          <p className={`text-center text-sm font-bold text-white sm:text-lg ${ended ? 'mb-2' : 'mb-3 sm:mb-4'}`}>
+          <motion.p
+            key={`for-${postKey}`}
+            className={`hall-for-line ${ended ? 'mb-2' : 'mb-3 sm:mb-4'}`}
+            initial={{ opacity: 0, y: 10, scale: 0.94 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.55, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+          >
             {forLabel(post)}{postGrade ? ` · Grade ${postGrade}` : ''}
-          </p>
+          </motion.p>
           {ended ? (
             <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden pt-2">
               {!winner ? (
