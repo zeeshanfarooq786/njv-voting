@@ -283,7 +283,7 @@ function PresentationShow({ board, onExit }) {
           transition={{ duration: ended ? 0.4 : 0.7, ease: [0.22, 1, 0.36, 1] }}
           style={ended ? undefined : { transformOrigin: 'center', backfaceVisibility: 'hidden' }}
         >
-          <p className="text-center text-[10px] font-bold tracking-[0.18em] text-[#FFC72C] uppercase sm:text-xs">{cat}</p>
+          <p className="truncate text-[10px] font-medium tracking-[0.18em] text-[#FFC72C] uppercase sm:text-xs">{cat}</p>
           <p className={`text-center text-sm font-bold text-white sm:text-lg ${ended ? 'mb-2' : 'mb-3 sm:mb-4'}`}>
             {forLabel(post)}{postGrade ? ` · Grade ${postGrade}` : ''}
           </p>
