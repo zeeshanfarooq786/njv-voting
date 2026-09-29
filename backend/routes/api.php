@@ -6,17 +6,17 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\VoteController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/teacher/login', [AuthController::class, 'teacherLogin'])->middleware('throttle:10,1');
+Route::post('/teacher/login', [AuthController::class, 'teacherLogin'])->middleware('throttle:60,1');
 Route::post('/admin/login', [AuthController::class, 'adminLogin'])->middleware('throttle:10,1');
 
-Route::get('/candidates', [VoteController::class, 'candidates'])->middleware('throttle:60,1');
-Route::get('/ballot', [VoteController::class, 'ballot'])->middleware(['auth:sanctum', 'throttle:120,1']);
-Route::post('/vote', [VoteController::class, 'store'])->middleware('throttle:20,1');
+Route::get('/candidates', [VoteController::class, 'candidates'])->middleware('throttle:300,1');
+Route::get('/ballot', [VoteController::class, 'ballot'])->middleware(['auth:sanctum', 'throttle:300,1']);
+Route::post('/vote', [VoteController::class, 'store'])->middleware('throttle:300,1');
 
-Route::middleware(['auth:sanctum', 'role:teacher', 'throttle:120,1'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:teacher', 'throttle:300,1'])->group(function () {
     Route::get('/teacher/me', [AuthController::class, 'me']);
     Route::post('/teacher/logout', [AuthController::class, 'logout']);
-    Route::post('/session/start', [SessionController::class, 'start'])->middleware('throttle:30,1');
+    Route::post('/session/start', [SessionController::class, 'start']);
     Route::post('/session/end', [SessionController::class, 'end']);
 });
 

@@ -51,8 +51,27 @@ class SessionController extends Controller
             VotingSession::query()
                 ->where('teacher_id', $teacher->id)
                 ->where('status', VotingSession::STATUS_ACTIVE)
+                ->where('expires_at', '<', now())
                 ->get()
                 ->each(fn (VotingSession $active) => $active->markExpired());
+
+            $existing = VotingSession::query()
+                ->where('teacher_id', $teacher->id)
+                ->where('student_email', $email)
+                ->where('status', VotingSession::STATUS_ACTIVE)
+                ->where('expires_at', '>=', now())
+                ->lockForUpdate()
+                ->first();
+
+            if ($existing) {
+                $existing->update([
+                    'student_grade' => $grade,
+                    'student_boarding' => $boarding,
+                    'expires_at' => now()->addMinutes(VotingSession::IDLE_MINUTES),
+                ]);
+
+                return $existing->fresh();
+            }
 
             return VotingSession::query()->create([
                 'teacher_id' => $teacher->id,

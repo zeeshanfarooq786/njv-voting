@@ -70,6 +70,7 @@ class VoteController extends Controller
             $ids[] = (int) $data['candidate_id'];
         }
         $ids = array_values(array_unique(array_map('intval', $ids)));
+        sort($ids);
         if ($ids === []) {
             return response()->json(['message' => 'Select a candidate for every post.'], 422);
         }
