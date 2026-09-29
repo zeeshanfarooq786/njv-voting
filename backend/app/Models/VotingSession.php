@@ -12,7 +12,7 @@ class VotingSession extends Model
     public const STATUS_VOTED = 'voted';
     public const STATUS_EXPIRED = 'expired';
 
-    public const IDLE_MINUTES = 5;
+    public const IDLE_MINUTES = 10;
 
     protected $fillable = [
         'teacher_id',
