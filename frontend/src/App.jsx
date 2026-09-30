@@ -452,10 +452,7 @@ export default function App() {
       api.me(getRole() || role).catch(() => {})
     }, 15000)
 
-    const onUnauth = () => {
-      if (!getToken()) return
-      forceLogout(getRole() || loginMode)
-    }
+    const onUnauth = () => {}
     window.addEventListener('njv:unauthenticated', onUnauth)
     return () => {
       cancelled = true
@@ -523,6 +520,7 @@ export default function App() {
             }}
             onRipple={(e) => spawnRipple(setRipples, e)}
             onCast={(result) => {
+              api.logout().catch(() => {})
               clearAuth()
               setUser(null)
               setVoteResult(result)
