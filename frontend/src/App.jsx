@@ -448,10 +448,14 @@ export default function App() {
 
     const keepAlive = setInterval(() => {
       if (cancelled) return
+      if (!getToken()) return
       api.me(getRole() || role).catch(() => {})
-    }, 4 * 60 * 1000)
+    }, 15000)
 
-    const onUnauth = () => {}
+    const onUnauth = () => {
+      if (!getToken()) return
+      forceLogout(getRole() || loginMode)
+    }
     window.addEventListener('njv:unauthenticated', onUnauth)
     return () => {
       cancelled = true
@@ -519,6 +523,8 @@ export default function App() {
             }}
             onRipple={(e) => spawnRipple(setRipples, e)}
             onCast={(result) => {
+              clearAuth()
+              setUser(null)
               setVoteResult(result)
               setScreen('confirm')
             }}
@@ -530,7 +536,8 @@ export default function App() {
             onDone={() => {
               setSession(null)
               setVoteResult(null)
-              setScreen('station')
+              setLoginMode('teacher')
+              setScreen('login')
             }}
           />
         ) : (

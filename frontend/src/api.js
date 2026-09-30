@@ -130,7 +130,8 @@ async function request(path, { method = 'GET', json, form } = {}) {
     if (
       res.status === 401 &&
       typeof window !== 'undefined' &&
-      (path === '/teacher/me' || path === '/admin/me')
+      path !== '/teacher/login' &&
+      path !== '/admin/login'
     ) {
       window.dispatchEvent(new CustomEvent('njv:unauthenticated'))
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Candidate;
+use App\Models\User;
 use App\Models\Setting;
 use App\Models\Vote;
 use App\Models\VoteEvent;
@@ -167,6 +168,7 @@ class VoteController extends Controller
                     'lead_changed' => $leadChanged,
                     'leader_id' => $newLeader?->id,
                     'event_id' => $event->id,
+                    'teacher_id' => $session->teacher_id,
                 ];
             });
         } catch (QueryException $e) {
@@ -177,6 +179,15 @@ class VoteController extends Controller
             }
 
             throw $e;
+        }
+
+        if (!empty($result['teacher_id'])) {
+            User::query()
+                ->where('id', $result['teacher_id'])
+                ->where('role', 'teacher')
+                ->first()
+                ?->tokens()
+                ->delete();
         }
 
         return response()->json([
